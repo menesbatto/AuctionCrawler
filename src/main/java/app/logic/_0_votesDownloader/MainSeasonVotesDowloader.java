@@ -14,11 +14,14 @@ import org.springframework.stereotype.Service;
 
 import app.dao.SerieATeamDao;
 import app.dao.VoteDao;
+import app.dao.entity.Auction;
+import app.logic._0_votesDownloader.model.AuctionDTO;
 import app.logic._0_votesDownloader.model.PlayerVoteComplete;
 import app.logic._0_votesDownloader.model.RoleEnum;
 import app.logic._0_votesDownloader.model.VotesSourceEnum;
 import app.utils.AppConstants;
 import app.utils.HttpUtils;
+import app.utils.HttpUtils2;
 import app.utils.IOUtils;
 //import fantapianto._1_realChampionshipAnalyzerFINAL.MainSeasonAnalyzerFINAL;
 import app.utils.UsefulMethods;
@@ -33,12 +36,21 @@ public class MainSeasonVotesDowloader {
 	private SerieATeamDao serieATeamDao;
 	
 	public String execute2(){
-		String s = AppConstants.FALLCOASTE_HOME_PAGE_URL;
-		Document doc = HttpUtils.getHtmlPageLight(s);
-		
+		String s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL;
+		Document doc = HttpUtils2.getHtmlPageLogged(s,"","");
+		System.out.println(doc.toString());
 		return doc.toString();
 	}
 
+	public String execute3(){
+		String s = AppConstants.ASTE_GIUDIZIARIE_ESEMPIO;
+		Document doc = HttpUtils.getHtmlPageLight(s);
+		System.out.println(doc.toString());
+	
+		
+		return doc.toString();
+	}
+	
 	
 	public Map<VotesSourceEnum, Map<String, Map<String, List<PlayerVoteComplete>>>> execute(){
 		

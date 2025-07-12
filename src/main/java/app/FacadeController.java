@@ -44,6 +44,21 @@ public class FacadeController {
 			ResponseEntity<String> response = new ResponseEntity<String>(d, HttpStatus.OK);
 			return response;
 		}
+		
+		// ###################################################
+		// ##########            1                ############
+		// ###################################################
+		
+		@RequestMapping(value = "/downloadAuctionEventPage", method = RequestMethod.GET)
+		public ResponseEntity<String> azione1() {
+			
+			String d = mainSeasonVotesDowloader.execute3();
+//			User p = personDao.findById(1L);
+			String body = "Downloading Single Page COMPLETED";
+			
+			ResponseEntity<String> response = new ResponseEntity<String>(d, HttpStatus.OK);
+			return response;
+		}
 	
 	// ###################################################
 	// ##########            1                ############

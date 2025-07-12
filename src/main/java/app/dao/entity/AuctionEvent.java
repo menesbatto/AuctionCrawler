@@ -19,17 +19,42 @@ public class AuctionEvent {
 	@ManyToOne
 	private Auction auction;
 	
-	private Date sellDate;			//Data Vendita INIZIO
+	private Date sellStartDate;			//Data Vendita INIZIO
+	private Date sellEndDate;			//Data Vendita FINE
+	
+	
 	private String sellState;		//Stato Vendita 		ENUM
 	private String sellCode;		//Codice Vendita				?????	identificativo dell'auctionEvent in fallcoaste sta 1 a 1 con il idPVP
 	private String idPVP;			//Identificativo PVP (Portale delle Vendite Pubbliche)	identificativo dell'auctionEvent 	- Istanze, Evento, Esperimento dell'asta
 	
-	private Double startedPrice;	//Prezzo			
-	private Double currentPrice;	//Prezzo al momento ha senso solo se l'asta è in corso.
-	private Double endPrice;		//Prezzo finale 		
+	private Double startedPrice;			//Prezzo
+	private Double startedPriceWithTaxes;	//Prezzo piu' tasse
+	private Double currentPrice;			//Prezzo al momento ha senso solo se l'asta è in corso.
+	private Double currentPriceWithTaxes;			//Prezzo al momento ha senso solo se l'asta è in corso.
+	
+	private Double endPrice;				//Prezzo finale 		
+	private Double endPriceWithTaxes;			//Prezzo al momento ha senso solo se l'asta è in corso.
 	
 	
 
+	public Double getStartedPriceWithTaxes() {
+		return startedPriceWithTaxes;
+	}
+	public void setStartedPriceWithTaxes(Double startedPriceWithTaxes) {
+		this.startedPriceWithTaxes = startedPriceWithTaxes;
+	}
+	public Double getCurrentPriceWithTaxes() {
+		return currentPriceWithTaxes;
+	}
+	public void setCurrentPriceWithTaxes(Double currentPriceWithTaxes) {
+		this.currentPriceWithTaxes = currentPriceWithTaxes;
+	}
+	public Double getEndPriceWithTaxes() {
+		return endPriceWithTaxes;
+	}
+	public void setEndPriceWithTaxes(Double endPriceWithTaxes) {
+		this.endPriceWithTaxes = endPriceWithTaxes;
+	}
 	public long getId() {
 		return id;
 	}
@@ -44,12 +69,12 @@ public class AuctionEvent {
 	public void setAuction(Auction auction) {
 		this.auction = auction;
 	}
-	public Date getSellDate() {
-		return sellDate;
-	}
-	public void setSellDate(Date sellDate) {
-		this.sellDate = sellDate;
-	}
+
+
+
+
+
+
 	public String getSellState() {
 		return sellState;
 	}
@@ -86,12 +111,32 @@ public class AuctionEvent {
 	public void setEndPrice(Double endPrice) {
 		this.endPrice = endPrice;
 	}
+	public Date getSellStartDate() {
+		return sellStartDate;
+	}
+	public void setSellStartDate(Date sellStartDate) {
+		this.sellStartDate = sellStartDate;
+	}
+	public Date getSellEndDate() {
+		return sellEndDate;
+	}
+	public void setSellEndDate(Date sellEndDate) {
+		this.sellEndDate = sellEndDate;
+	}
 	@Override
 	public String toString() {
-		return "AuctionEvent [id=" + id + ", auction=" + auction + ", sellDate=" + sellDate + ", sellState=" + sellState
-				+ ", sellCode=" + sellCode + ", idPVP=" + idPVP + ", startedPrice=" + startedPrice + ", currentPrice="
-				+ currentPrice + ", endPrice=" + endPrice + "]";
+		return "AuctionEvent [id=" + id + ", auction=" + auction + ", sellStartDate=" + sellStartDate + ", sellEndDate="
+				+ sellEndDate + ", sellState=" + sellState + ", sellCode=" + sellCode + ", idPVP=" + idPVP
+				+ ", startedPrice=" + startedPrice + ", startedPriceWithTaxes=" + startedPriceWithTaxes
+				+ ", currentPrice=" + currentPrice + ", currentPriceWithTaxes=" + currentPriceWithTaxes + ", endPrice="
+				+ endPrice + ", endPriceWithTaxes=" + endPriceWithTaxes + "]";
 	}
-
 	
+
+
+
+
+
+
+
 }

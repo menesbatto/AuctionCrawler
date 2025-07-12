@@ -12,8 +12,8 @@ public class AppConstants {
 	
 	
 	public static String FALLCOASTE_HOME_PAGE_URL = "http://www.fantagazzetta.com/voti-fantacalcio-serie-a";
-	
-	
+	public static String ASTE_GIUDIZIARIE_HOME_PAGE_URL = "https://www.astagiudiziaria.com/ricerca/mobili";
+	public static String ASTE_GIUDIZIARIE_ESEMPIO =  "https://www.astagiudiziaria.com/inserzioni/rif-8-anello-oro-bianco-750-con-quarzo-rosa-e-diamanti-ct-080-peso-totale-gr-527-1272381";
 	//	URL
 	public static String LAST_SEASON_DAY_URL = "http://www.fantagazzetta.com/voti-fantacalcio-serie-a";
 

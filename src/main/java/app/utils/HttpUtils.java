@@ -35,6 +35,19 @@ public class HttpUtils {
 		return doc;
 	}
 	
+	public static Document getHtmlPageNoLogged(String url){
+		Document doc = null;
+		Connection connect = Jsoup.connect(url);
+	
+		try {
+			doc = connect.ignoreContentType(true).get();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return doc;
+	}
+	
 	
 	public static Document getHtmlPage(String url){
 		Document doc = null;

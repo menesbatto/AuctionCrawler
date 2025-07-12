@@ -1,26 +1,15 @@
-package app.dao.entity;
+package app.logic._0_votesDownloader.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-@Entity
-public class Proceeding {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+import java.io.Serializable;
+
+public class ProceedingDTO implements Serializable{
+
+	private static final long serialVersionUID = -6013685603395381635L;
 
 	private String number;
 	private String year;
 	private String description;
 	
-	
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
 	public String getNumber() {
 		return number;
 	}
@@ -33,6 +22,9 @@ public class Proceeding {
 	public void setYear(String year) {
 		this.year = year;
 	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 	public String getDescription() {
 		return description;
 	}
@@ -41,11 +33,8 @@ public class Proceeding {
 	}
 	@Override
 	public String toString() {
-		return "Proceeding [id=" + id + ", number=" + number + ", year=" + year + ", description=" + description + "]";
+		return "ProceedingDTO [number=" + number + ", year=" + year + ", description=" + description + "]";
 	}
-	
-	
-	
 	
 	
 }

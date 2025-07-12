@@ -6,7 +6,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import app.dao.entity.Proceeding;
 
 @RepositoryRestResource
-public interface ProcedureRepo extends JpaRepository<Proceeding, Long> {
+public interface ProceedingRepo extends JpaRepository<Proceeding, Long> {
 
 
 }

@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @EnableCaching
-public class ProcedureDao {
+public class ProceedingDao {
 
 	@Autowired
-	private ProcedureRepo procedureRepo;
+	private ProceedingRepo proceedingRepo;
 
 //
 //	public void saveGazzettaCredentials(Credentials credentials) {
