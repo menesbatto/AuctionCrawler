@@ -32,6 +32,12 @@ public class MainSeasonVotesDowloader {
 	@Autowired
 	private SerieATeamDao serieATeamDao;
 	
+	public String execute2(){
+		String s = AppConstants.FALLCOASTE_HOME_PAGE_URL;
+		Document doc = HttpUtils.getHtmlPageLight(s);
+		
+		return doc.toString();
+	}
 
 	
 	public Map<VotesSourceEnum, Map<String, Map<String, List<PlayerVoteComplete>>>> execute(){

@@ -10,6 +10,10 @@ import app.logic._0_votesDownloader.model.VotesSourceEnum;
 public class AppConstants {
 	
 	
+	
+	public static String FALLCOASTE_HOME_PAGE_URL = "http://www.fantagazzetta.com/voti-fantacalcio-serie-a";
+	
+	
 	//	URL
 	public static String LAST_SEASON_DAY_URL = "http://www.fantagazzetta.com/voti-fantacalcio-serie-a";
 

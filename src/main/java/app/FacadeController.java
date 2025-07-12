@@ -31,6 +31,21 @@ public class FacadeController {
 	private UserExpert userExpert;
 	
 	// ###################################################
+		// ##########            1                ############
+		// ###################################################
+		
+		@RequestMapping(value = "/downloadSinglePage", method = RequestMethod.GET)
+		public ResponseEntity<String> downloadSinglePage() {
+			
+			String d = mainSeasonVotesDowloader.execute2();
+//			User p = personDao.findById(1L);
+			String body = "Downloading Single Page COMPLETED";
+			
+			ResponseEntity<String> response = new ResponseEntity<String>(d, HttpStatus.OK);
+			return response;
+		}
+	
+	// ###################################################
 	// ##########            1                ############
 	// ###################################################
 	
