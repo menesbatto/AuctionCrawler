@@ -10,6 +10,14 @@ public class ProceedingDTO implements Serializable{
 	private String year;
 	private String description;
 	
+	
+	
+	public ProceedingDTO(String number, String year, String description) {
+		super();
+		this.number = number;
+		this.year = year;
+		this.description = description;
+	}
 	public String getNumber() {
 		return number;
 	}

@@ -35,6 +35,7 @@ public class AuctionEvent {
 	private Double endPrice;				//Prezzo finale 		
 	private Double endPriceWithTaxes;			//Prezzo al momento ha senso solo se l'asta è in corso.
 	
+	private String urlDetailPage;
 	
 
 	public Double getStartedPriceWithTaxes() {
@@ -130,6 +131,12 @@ public class AuctionEvent {
 				+ ", startedPrice=" + startedPrice + ", startedPriceWithTaxes=" + startedPriceWithTaxes
 				+ ", currentPrice=" + currentPrice + ", currentPriceWithTaxes=" + currentPriceWithTaxes + ", endPrice="
 				+ endPrice + ", endPriceWithTaxes=" + endPriceWithTaxes + "]";
+	}
+	public String getUrlDetailPage() {
+		return urlDetailPage;
+	}
+	public void setUrlDetailPage(String urlDetailPage) {
+		this.urlDetailPage = urlDetailPage;
 	}
 	
 

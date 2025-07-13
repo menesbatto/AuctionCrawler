@@ -1,9 +1,16 @@
 package app.logic._0_votesDownloader;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,13 +19,22 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import app.dao.AuctionEventDao;
 import app.dao.SerieATeamDao;
 import app.dao.VoteDao;
 import app.dao.entity.Auction;
 import app.logic._0_votesDownloader.model.AuctionDTO;
+import app.logic._0_votesDownloader.model.AuctionEventDTO;
+import app.logic._0_votesDownloader.model.CategoryC0Enum;
+import app.logic._0_votesDownloader.model.CategoryC1Enum;
+import app.logic._0_votesDownloader.model.CategoryMacroEnum;
+import app.logic._0_votesDownloader.model.IVGEnum;
 import app.logic._0_votesDownloader.model.PlayerVoteComplete;
+import app.logic._0_votesDownloader.model.ProceedingDTO;
 import app.logic._0_votesDownloader.model.RoleEnum;
+import app.logic._0_votesDownloader.model.SellStateEnum;
 import app.logic._0_votesDownloader.model.VotesSourceEnum;
+import app.logic._0_votesDownloader.model.WareHouseLocationDTO;
 import app.utils.AppConstants;
 import app.utils.HttpUtils;
 import app.utils.HttpUtils2;
@@ -36,22 +52,139 @@ public class MainSeasonVotesDowloader {
 	private SerieATeamDao serieATeamDao;
 	
 	public String execute2(){
-		String s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL;
+		String s = AppConstants.ASTE_GIUDIZIARIE_ESEMPIO;
 		Document doc = HttpUtils2.getHtmlPageLogged(s,"","");
 		System.out.println(doc.toString());
 		return doc.toString();
 	}
 
 	public String execute3(){
-		String s = AppConstants.ASTE_GIUDIZIARIE_ESEMPIO;
-		Document doc = HttpUtils.getHtmlPageLight(s);
-		System.out.println(doc.toString());
+		String s;
+		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
+		Document doc= null;
+		for (int i = 6; i<=10; i++) {
+			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
+			doc = HttpUtils2.getHtmlPageLogged(s,"","");
+			auctionEventList.addAll(extractAuctionEvents(doc));
+		}
+		
+//		System.out.println(doc.toString());
 	
 		
 		return doc.toString();
 	}
 	
 	
+	private List<AuctionEventDTO> extractAuctionEvents(Document doc) {
+		
+		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
+		AuctionEventDTO auctionEvent;
+//		Elements teamsIds = doc.select("div.row.no-gutter.tbvoti");
+		Elements elements = doc.getElementsByClass("asta-card");
+		System.out.println(elements.size());
+		int i = 1;
+		for(Element current : elements){
+//			System.out.println(current);
+//			System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+			auctionEvent = new AuctionEventDTO();
+			
+			String urlDetailPage = current.getElementsByAttribute("href").get(0).attr("href");
+			auctionEvent.setUrlDetailPage(urlDetailPage);
+			
+			String ivgString = current.getElementsByClass("badge").get(0).text();
+			auctionEvent.getAuction().setIdIVG(IVGEnum.findByDescription(ivgString));
+			
+			String description = current.getElementsByClass("asta-card-title").get(0).text();
+			auctionEvent.getAuction().setDescription(description);
+			System.out.println(i++ + " - " + description);
+			
+			
+			String categoryC0String = current.getElementsByClass("category-label").get(0).text();
+			CategoryC0Enum categoryC0 = CategoryC0Enum.findByDescription(categoryC0String);
+			auctionEvent.getAuction().setCategoryC0(categoryC0 );
+			
+			
+			String categoryC1String = current.getElementsByClass("subcategory-label").get(0).text();
+			CategoryC1Enum categoryC1 = CategoryC1Enum.findByDescription(categoryC1String);
+			auctionEvent.getAuction().setCategoryC1(categoryC1 );
+//			System.out.println(current);
+int a = 1;			
+			String priceString = current.getElementsByClass("price-tag").get(0).text();
+			if (priceString.equals("Vendita a lotti singoli")) {
+			
+			}
+			else if (priceString.equals("Non presente")) {
+				auctionEvent.setStartedPrice(new Double(0));
+			} else {
+				priceString  = priceString.replace("€ ", "");
+				priceString  = priceString.replace(".", "");
+				priceString  = priceString.replace(",",".");
+				try {
+					auctionEvent.setStartedPrice(new Double(priceString));
+				}
+				catch (Exception e) {
+					System.out.println(priceString);
+				}
+			}
+				
+			Element element = current.getElementsByClass("card-footer").get(0);
+			Elements footerElements = element.getElementsByClass("text-truncate");
+			
+			String dateString = footerElements.get(0).text();
+			String regex = "\\b(\\d{2}/\\d{2}/\\d{4})\\b";
+		    Pattern pattern = Pattern.compile(regex);
+		    Matcher matcher = pattern.matcher(dateString);
+		    matcher.find();
+		    String  startDateString = matcher.group(1);
+			
+//			String startDateString = dateString.split(" ")[1];
+			Date startDate = UsefulMethods.getDate(startDateString);
+			auctionEvent.setSellStartDate(startDate);
+			
+			String proceedingString = footerElements.get(1).text();
+			String proceedingTypeString = proceedingString.split(" Nr. ")[0];
+			String proceedingNumberString = proceedingString.split(" Nr. ")[1].split("/")[0];
+			String proceedingYearString = proceedingString.split(" Nr. ")[1].split("/")[1];
+			ProceedingDTO proceeding = new ProceedingDTO(proceedingNumberString, proceedingYearString, proceedingTypeString);
+			auctionEvent.getAuction().setProceeding(proceeding);
+			
+
+			String lotString = footerElements.get(2).text();
+			auctionEvent.getAuction().setLotCode(lotString);
+			
+			String cityString = footerElements.get(3).text();
+			WareHouseLocationDTO warehouseLocation = new WareHouseLocationDTO();
+			warehouseLocation.setCity(cityString);
+			auctionEvent.getAuction().setWarehouseLocation(warehouseLocation);
+		
+			
+			String sellStateString = footerElements.get(4).text();
+			auctionEvent.setSellState(SellStateEnum.findByDescription(sellStateString));
+			
+			
+			auctionEventList.add(auctionEvent);
+			
+//			String gazzettaTeamId = current.attr("data-team");
+//			String name = current.attr("id").toUpperCase();
+			
+		}
+		
+//		Elements teamsIds = doc.select("div.row.no-gutter.tbvoti");
+//		for(Element team : teamsIds){
+//			String gazzettaTeamId = team.attr("data-team");
+//			String name = team.attr("id").toUpperCase();
+//			
+//		}
+//		
+//		String lastSerieASeasonDayString = doc.getElementsByClass("card").get(1).text();
+//		Integer lastSerieASeasonDay = Integer.valueOf(lastSerieASeasonDayString);
+		
+		
+		return auctionEventList ;
+	}
+
+	
+
 	public Map<VotesSourceEnum, Map<String, Map<String, List<PlayerVoteComplete>>>> execute(){
 		
 		populateSerieATeam();

@@ -50,7 +50,7 @@ public class FacadeController {
 		// ###################################################
 		
 		@RequestMapping(value = "/downloadAuctionEventPage", method = RequestMethod.GET)
-		public ResponseEntity<String> azione1() {
+		public ResponseEntity<String> downloadAuctionEventPage() {
 			
 			String d = mainSeasonVotesDowloader.execute3();
 //			User p = personDao.findById(1L);

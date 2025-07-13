@@ -24,6 +24,7 @@ public class HttpUtils {
 
 	public static Document getHtmlPageLight(String url){
 		Document doc = null;
+//		url="https://www.fallcoaste.it/vendita/a-appartamento-a-calimera-via-marco-polo-della-superficie-commerciale-di-190-84-mq-per-la-quota-di-333-1172917.html";
 		Connection connect = Jsoup.connect(url);
 	
 		try {

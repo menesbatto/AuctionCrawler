@@ -9,7 +9,7 @@ public class AuctionEventDTO implements Serializable{
 
 	private static final long serialVersionUID = -584699076780093831L;
 
-	private Auction auction;
+	private AuctionDTO auction;
 	
 	private Date sellStartDate;				//Data Vendita INIZIO
 	private Date sellEndDate;				//Data Vendita INIZIO
@@ -22,13 +22,26 @@ public class AuctionEventDTO implements Serializable{
 	private Double currentPrice;		//Prezzo al momento ha senso solo se l'asta è in corso.
 	private Double endPrice;			//Prezzo finale 		
 	
-	public Auction getAuction() {
-		return auction;
-	}
-	public void setAuction(Auction auction) {
-		this.auction = auction;
+	private String urlDetailPage;
+	
+	
+	
+	public AuctionEventDTO() {
+		super();
+		this.auction = new AuctionDTO();
 	}
 	
+	
+	public AuctionDTO getAuction() {
+		return auction;
+	}
+
+
+	public void setAuction(AuctionDTO auction) {
+		this.auction = auction;
+	}
+
+
 	public SellStateEnum getSellState() {
 		return sellState;
 	}
@@ -82,9 +95,19 @@ public class AuctionEventDTO implements Serializable{
 	}
 	@Override
 	public String toString() {
-		return "AuctionEventDTO [auction=" + auction + ", sellStartDate=" + sellStartDate + ", sellEndDate="
-				+ sellEndDate + ", sellState=" + sellState + ", sellCode=" + sellCode + ", idPVP=" + idPVP
-				+ ", startedPrice=" + startedPrice + ", currentPrice=" + currentPrice + ", endPrice=" + endPrice + "]";
+		return "AuctionEventDTO [auction=" + auction + ", \nsellStartDate=" + sellStartDate + ", \\nsellEndDate="
+				+ sellEndDate + ", \\nsellState=" + sellState + ", \\nsellCode=" + sellCode + ", \\nidPVP=" + idPVP
+				+ ", \\nstartedPrice=" + startedPrice + ", \\ncurrentPrice=" + currentPrice + ", \\nendPrice=" + endPrice + "]";
+	}
+
+
+	public String getUrlDetailPage() {
+		return urlDetailPage;
+	}
+
+
+	public void setUrlDetailPage(String urlDetailPage) {
+		this.urlDetailPage = urlDetailPage;
 	}
 
 	
