@@ -13,7 +13,7 @@ public class AuctionDTO implements Serializable {
 
 	private WareHouseLocationDTO warehouseLocation; // Località
 
-	private String name;
+	private String title;
 
 	private CategoryMacroEnum categoryMacro; 		// Categoria ENUM
 	private CategoryC0Enum categoryC0; 			// Categoria ENUM
@@ -60,14 +60,15 @@ public class AuctionDTO implements Serializable {
 		this.warehouseLocation = warehouseLocation;
 	}
 
-	public String getName() {
-		return name;
+	
+
+	public String getTitle() {
+		return title;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setTitle(String title) {
+		this.title = title;
 	}
-
 
 	public SellTypeEnum getSellType() {
 		return sellType;
@@ -126,7 +127,7 @@ public class AuctionDTO implements Serializable {
 	@Override
 	public String toString() {
 		return "AuctionDTO [proceeding=" + proceeding + ", \nlotCode=" + lotCode + ", \nwarehouseLocation="
-				+ warehouseLocation + ", \nname=" + name + ", \ncategoryMacro=" + categoryMacro + ", \ncategoryC0="
+				+ warehouseLocation + ", \nname=" + title + ", \ncategoryMacro=" + categoryMacro + ", \ncategoryC0="
 				+ categoryC0 + ", \ncategoryC1=" + categoryC1 + ", \nsellType=" + sellType + ", \ncourt=" + court
 				+ ", \ndescription=" + description + ", \nidIVG=" + idIVG + "]";
 	}

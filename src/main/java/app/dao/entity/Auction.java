@@ -1,5 +1,7 @@
 package app.dao.entity;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,16 +16,16 @@ public class Auction {
 	private long id;
 
 	
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.ALL})
 	private Proceeding proceeding;//numero e anno											evento giudiziario che ha portato alla vendita di vari oggetti
 	private String lotCode;		//Codice Lotto											identificativo dell'auction 		- Lotto relativo ad una procedure su cui è stata creata una asta 
   	
 	
-	@OneToOne
+	@OneToOne(cascade = {CascadeType.ALL})
 	private WareHouseLocation warehouseLocation;	//Località  			
 	
 	
-	private String name;
+	private String title;
 	
 	private String category;	//Categoria				ENUM
 	private String sellType;	//Tipo vendita			ENUM
@@ -31,7 +33,7 @@ public class Auction {
 	
 	private String court;		//Tribunale				ENUM
 	
-	
+	@Column(length = 1000)
 	private String description;	//Descrizione	
 	
 	
@@ -84,14 +86,17 @@ public class Auction {
 
 
 
-	public String getName() {
-		return name;
+
+
+
+	public String getTitle() {
+		return title;
 	}
 
 
 
-	public void setName(String name) {
-		this.name = name;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 
@@ -171,7 +176,7 @@ public class Auction {
 
 	@Override
 	public String toString() {
-		return "Auction [id=" + id + ", proceeding=" + proceeding + ", lotCode=" + lotCode + ", name=" + name
+		return "Auction [id=" + id + ", proceeding=" + proceeding + ", lotCode=" + lotCode + ", name=" + title
 				+ ", category=" + category + ", sellType=" + sellType + ", location=" + warehouseLocation + ", court=" + court
 				+ ", description=" + description + ", idIVG=" + idIVG + "]";
 	}

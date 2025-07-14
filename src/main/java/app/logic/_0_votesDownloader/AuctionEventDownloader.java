@@ -31,6 +31,7 @@ import app.logic._0_votesDownloader.model.CategoryMacroEnum;
 import app.logic._0_votesDownloader.model.IVGEnum;
 import app.logic._0_votesDownloader.model.PlayerVoteComplete;
 import app.logic._0_votesDownloader.model.ProceedingDTO;
+import app.logic._0_votesDownloader.model.ProcessStatusEnum;
 import app.logic._0_votesDownloader.model.RoleEnum;
 import app.logic._0_votesDownloader.model.SellStateEnum;
 import app.logic._0_votesDownloader.model.VotesSourceEnum;
@@ -43,7 +44,7 @@ import app.utils.IOUtils;
 import app.utils.UsefulMethods;
 
 @Service
-public class MainSeasonVotesDowloader {
+public class AuctionEventDownloader {
 	
 	@Autowired
 	private VoteDao voteDao;
@@ -51,30 +52,103 @@ public class MainSeasonVotesDowloader {
 	@Autowired
 	private SerieATeamDao serieATeamDao;
 	
-	public String execute2(){
-		String s = AppConstants.ASTE_GIUDIZIARIE_ESEMPIO;
-		Document doc = HttpUtils2.getHtmlPageLogged(s,"","");
-		System.out.println(doc.toString());
-		return doc.toString();
-	}
-
-	public String execute3(){
+	@Autowired
+	private AuctionEventDao auctionEventDao;
+	
+	public String executeDownloadAuctionEventFromSearchPage(){
 		String s;
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
 		Document doc= null;
-		for (int i = 6; i<=10; i++) {
+		for (int i = 2; i<=2; i++) {
 			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
 			doc = HttpUtils2.getHtmlPageLogged(s,"","");
-			auctionEventList.addAll(extractAuctionEvents(doc));
+			List<AuctionEventDTO> extractedAuctionEvents = extractAuctionEvents(doc);
+			auctionEventList.addAll(extractedAuctionEvents);
 		}
-		
+		auctionEventDao.saveAuctionEvents(auctionEventList);
 //		System.out.println(doc.toString());
-	
-		
 		return doc.toString();
 	}
 	
 	
+	public String executeDownloadAuctionEventDetails(){
+		List<AuctionEventDTO> auctionEventList = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.LIGHT_INFO_DOWNLOADED);
+		for (AuctionEventDTO dto : auctionEventList) {
+			Document doc = HttpUtils2.getHtmlPageLogged(AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl(),"","");
+//			Document doc = HttpUtils2.getHtmlPageLogged("https://www.astagiudiziaria.com/inserzioni/macchinari-accessori-auto-po-1260-1264255","","");
+			enrichAuctionEventWithDetailPage(dto, doc);
+			auctionEventDao.saveAuctionEvent(dto);
+			List<AuctionEventDTO> createAuctionEventCronology = createAuctionEventCronology(dto, doc);
+			auctionEventDao.saveAuctionEvents(createAuctionEventCronology);
+		}
+		return "";
+	}
+	
+	
+	private List<AuctionEventDTO> createAuctionEventCronology (AuctionEventDTO dto, Document doc) {
+		Element storicoAste = doc.getElementById("storico-aste");
+		List<AuctionEventDTO> list = new ArrayList<>();
+		if (storicoAste!= null) {
+//			System.out.println(doc);
+					
+			Elements tryList = storicoAste.select("tbody > tr");
+			
+			String dataString;
+			String sellState;
+			String startPrice;
+			String detailPageUrl;
+			
+			for (Element auctionEventElem : tryList) {
+				Elements auctionEventProperties = auctionEventElem.select("td");
+				dataString = auctionEventProperties.get(0).text();
+				sellState = auctionEventProperties.get(1).text();
+				startPrice = auctionEventProperties.get(2).text();
+				startPrice = UsefulMethods.getCleanNumberString(startPrice);
+				detailPageUrl = auctionEventProperties.get(3).select("a").attr("href");
+				
+				AuctionEventDTO otherAuctionEvent = new AuctionEventDTO();
+				otherAuctionEvent.setSellStartDate(UsefulMethods.getDate(dataString));
+				otherAuctionEvent.setSellState(SellStateEnum.findByDescription(sellState.toUpperCase()));
+				otherAuctionEvent.setStartPrice(Double.valueOf(startPrice));
+				otherAuctionEvent.setDetailPageUrl(detailPageUrl!=""?detailPageUrl:null);
+				
+				otherAuctionEvent.setAuction(dto.getAuction());
+				list.add(otherAuctionEvent);
+			}
+		}
+		return list;
+	}
+	private void enrichAuctionEventWithDetailPage(AuctionEventDTO dto, Document doc) {
+		
+		
+		
+		// DA POPOLARE AUCTION EVENT
+			Element infoVendita = doc.getElementById("informazioni-vendita");
+			
+			
+			Element dettaglioLotto = doc.getElementById("dettaglio-lotto");
+			Element tabDocumenti= doc.getElementById("tab-documenti");
+	//		other-docs-beni-0
+	//		allDocuments
+			String description = doc.getElementById("description").text();
+			System.out.println();
+			dto.getAuction().setDescription(description);
+			
+			
+			Element indirizzoLabel = dettaglioLotto.select("div:containsOwn(Indirizzo)").first();
+//			if (indirizzoLabel != null) {
+//			    Element indirizzoValore = indirizzoLabel.parent().select("div").get(2);
+//			    WareHouseLocationDTO warehouseLocation = dto.getAuction().getWarehouseLocation();
+//			    warehouseLocation.setCity(indirizzoValore.text());
+//			
+//			
+//		}
+		
+	}
+
+
+
+
 	private List<AuctionEventDTO> extractAuctionEvents(Document doc) {
 		
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
@@ -88,14 +162,17 @@ public class MainSeasonVotesDowloader {
 //			System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 			auctionEvent = new AuctionEventDTO();
 			
-			String urlDetailPage = current.getElementsByAttribute("href").get(0).attr("href");
-			auctionEvent.setUrlDetailPage(urlDetailPage);
+							auctionEvent.getAuction().setCategoryMacro(CategoryMacroEnum.BENI_MOBILI);
+			
+			String detailPageUrl = current.getElementsByAttribute("href").get(0).attr("href");
+			auctionEvent.setDetailPageUrl(detailPageUrl);
 			
 			String ivgString = current.getElementsByClass("badge").get(0).text();
 			auctionEvent.getAuction().setIdIVG(IVGEnum.findByDescription(ivgString));
 			
 			String description = current.getElementsByClass("asta-card-title").get(0).text();
 			auctionEvent.getAuction().setDescription(description);
+							//auctionEvent.getAuction().setTitle();
 			System.out.println(i++ + " - " + description);
 			
 			
@@ -114,13 +191,11 @@ int a = 1;
 			
 			}
 			else if (priceString.equals("Non presente")) {
-				auctionEvent.setStartedPrice(new Double(0));
+				auctionEvent.setStartPrice(new Double(0));
 			} else {
-				priceString  = priceString.replace("€ ", "");
-				priceString  = priceString.replace(".", "");
-				priceString  = priceString.replace(",",".");
+				priceString = UsefulMethods.getCleanNumberString(priceString);
 				try {
-					auctionEvent.setStartedPrice(new Double(priceString));
+					auctionEvent.setStartPrice(new Double(priceString));
 				}
 				catch (Exception e) {
 					System.out.println(priceString);
@@ -183,6 +258,55 @@ int a = 1;
 		return auctionEventList ;
 	}
 
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 
 	public Map<VotesSourceEnum, Map<String, Map<String, List<PlayerVoteComplete>>>> execute(){

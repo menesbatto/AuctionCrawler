@@ -8,5 +8,9 @@ import app.dao.entity.Proceeding;
 @RepositoryRestResource
 public interface ProceedingRepo extends JpaRepository<Proceeding, Long> {
 
+//	Proceeding findByDescription(String description);
+
+	Proceeding findByNumberAndYear(String number, String year);
+
 
 }

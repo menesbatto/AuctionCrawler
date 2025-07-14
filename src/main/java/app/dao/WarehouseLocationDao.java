@@ -4,12 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 
+import app.dao.entity.WareHouseLocation;
+
 @Service
 @EnableCaching
 public class WarehouseLocationDao {
 
 	@Autowired
 	private WarehouseLocationRepo warehouseLocationRepo;
+
+
+	public WareHouseLocation retrieveByCityAndStreet(String city, String street) {
+		WareHouseLocation warehouseLocation = warehouseLocationRepo.findByCityAndStreet(city, street);
+		return warehouseLocation;
+	}
 
 //
 //	public void saveGazzettaCredentials(Credentials credentials) {

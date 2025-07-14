@@ -15,6 +15,15 @@ public class UsefulMethods {
         return fact;
     }
     
+    
+    public static String getCleanNumberString(String priceString) {
+		priceString  = priceString.replace("€ ", "");
+		priceString  = priceString.replace(".", "");
+		priceString  = priceString.replace(",",".");
+		return priceString;
+	}
+
+    
     public static Double getNumber(String s){
     	return !s.equals("-") ? Double.valueOf(s.replace(",", ".")) : 0;
     }

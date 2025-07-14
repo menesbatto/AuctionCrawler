@@ -9,5 +9,7 @@ import app.dao.entity.WareHouseLocation;
 @RepositoryRestResource
 public interface WarehouseLocationRepo extends JpaRepository<WareHouseLocation, Long> {
 
+	WareHouseLocation findByCityAndStreet(String city, String street);
+
 
 }

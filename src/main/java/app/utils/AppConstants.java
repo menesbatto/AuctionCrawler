@@ -9,7 +9,7 @@ import app.logic._0_votesDownloader.model.VotesSourceEnum;
 
 public class AppConstants {
 	
-	
+	public static String ASTE_GIUDIZIARIE_BASE_URL = "https://www.astagiudiziaria.com";
 	
 	public static String FALLCOASTE_HOME_PAGE_URL = "https://www.fallcoaste.it/ricerca.html?filter=macro%7C527%5Einput_categoria%7CBeni%20Immobili%5Eubicazione_dst%7C50%5Estato%7C1&page=1";
 //	public static String ASTE_GIUDIZIARIE_HOME_PAGE_URL = "https://www.astagiudiziaria.com/ricerca/mobili";

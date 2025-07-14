@@ -18,12 +18,39 @@ public class AuctionEventDTO implements Serializable{
 	private String sellCode;			//Codice Vendita				?????	identificativo dell'auctionEvent in fallcoaste sta 1 a 1 con il idPVP
 	private String idPVP;				//Identificativo PVP (Portale delle Vendite Pubbliche)	identificativo dell'auctionEvent 	- Istanze, Evento, Esperimento dell'asta
 	
-	private Double startedPrice;		//Prezzo			
+	private Double startPrice;		//Prezzo			
+	private Double startPriceWithTaxes;		//Prezzo			
 	private Double currentPrice;		//Prezzo al momento ha senso solo se l'asta è in corso.
-	private Double endPrice;			//Prezzo finale 		
+	private Double currentPriceWithTaxes;		//Prezzo al momento ha senso solo se l'asta è in corso.
+	private Double endPrice;
+	private Double endPriceWithTaxes;
 	
-	private String urlDetailPage;
+	//Prezzo finale 		
 	
+	private String detailPageUrl;
+	private String auctionPageUrl;
+
+	public Double getCurrentPriceWithTaxes() {
+		return currentPriceWithTaxes;
+	}
+
+
+	public void setCurrentPriceWithTaxes(Double currentPriceWithTaxes) {
+		this.currentPriceWithTaxes = currentPriceWithTaxes;
+	}
+
+
+	public Double getEndPriceWithTaxes() {
+		return endPriceWithTaxes;
+	}
+
+
+	public void setEndPriceWithTaxes(Double endPriceWithTaxes) {
+		this.endPriceWithTaxes = endPriceWithTaxes;
+	}
+
+
+
 	
 	
 	public AuctionEventDTO() {
@@ -60,12 +87,7 @@ public class AuctionEventDTO implements Serializable{
 	public void setIdPVP(String idPVP) {
 		this.idPVP = idPVP;
 	}
-	public Double getStartedPrice() {
-		return startedPrice;
-	}
-	public void setStartedPrice(Double startedPrice) {
-		this.startedPrice = startedPrice;
-	}
+	
 	public Double getCurrentPrice() {
 		return currentPrice;
 	}
@@ -93,22 +115,59 @@ public class AuctionEventDTO implements Serializable{
 	public void setSellEndDate(Date sellEndDate) {
 		this.sellEndDate = sellEndDate;
 	}
+	
+
+	public String getDetailPageUrl() {
+		return detailPageUrl;
+	}
+
+
+	public void setDetailPageUrl(String urlDetailPage) {
+		this.detailPageUrl = urlDetailPage;
+	}
+
+
+	public Double getStartPrice() {
+		return startPrice;
+	}
+
+
+	public void setStartPrice(Double startPrice) {
+		this.startPrice = startPrice;
+	}
+
+
+	public Double getStartPriceWithTaxes() {
+		return startPriceWithTaxes;
+	}
+
+
+	public void setStartPriceWithTaxes(Double startPriceWithTaxes) {
+		this.startPriceWithTaxes = startPriceWithTaxes;
+	}
+
+
 	@Override
 	public String toString() {
-		return "AuctionEventDTO [auction=" + auction + ", \nsellStartDate=" + sellStartDate + ", \\nsellEndDate="
-				+ sellEndDate + ", \\nsellState=" + sellState + ", \\nsellCode=" + sellCode + ", \\nidPVP=" + idPVP
-				+ ", \\nstartedPrice=" + startedPrice + ", \\ncurrentPrice=" + currentPrice + ", \\nendPrice=" + endPrice + "]";
+		return "AuctionEventDTO [auction=" + auction + ", sellStartDate=" + sellStartDate + ", sellEndDate="
+				+ sellEndDate + ", sellState=" + sellState + ", sellCode=" + sellCode + ", idPVP=" + idPVP
+				+ ", startPrice=" + startPrice + ", startPriceWithTaxes=" + startPriceWithTaxes + ", currentPrice="
+				+ currentPrice + ", currentPriceWithTaxes=" + currentPriceWithTaxes + ", endPrice=" + endPrice
+				+ ", endPriceWithTaxes=" + endPriceWithTaxes + ", urlDetailPage=" + detailPageUrl + "]";
 	}
 
 
-	public String getUrlDetailPage() {
-		return urlDetailPage;
+	public String getAuctionPageUrl() {
+		return auctionPageUrl;
 	}
 
 
-	public void setUrlDetailPage(String urlDetailPage) {
-		this.urlDetailPage = urlDetailPage;
+	public void setAuctionPageUrl(String auctionPageUrl) {
+		this.auctionPageUrl = auctionPageUrl;
 	}
+
+
+	
 
 	
 	

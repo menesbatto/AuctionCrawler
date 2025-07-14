@@ -13,7 +13,7 @@ import app.logic._0_credentialsSaver.UserExpert;
 import app.logic._0_credentialsSaver.model.ConfirmUser;
 import app.logic._0_credentialsSaver.model.Credentials;
 import app.logic._0_credentialsSaver.model.UserBean;
-import app.logic._0_votesDownloader.MainSeasonVotesDowloader;
+import app.logic._0_votesDownloader.AuctionEventDownloader;
 import app.logic._0_votesDownloader_0_rulesDownloader.RulesExpertMain;
 
 @Controller // This means that this class is a Controller
@@ -22,7 +22,7 @@ public class FacadeController {
 
 
 	@Autowired
-	private MainSeasonVotesDowloader mainSeasonVotesDowloader;
+	private AuctionEventDownloader auctionEventDownloader;
 
 	@Autowired
 	private RulesExpertMain rulesExpertMain;
@@ -30,14 +30,16 @@ public class FacadeController {
 	@Autowired
 	private UserExpert userExpert;
 	
-	// ###################################################
+	
+		
+		// ###################################################
 		// ##########            1                ############
 		// ###################################################
 		
-		@RequestMapping(value = "/downloadSinglePage", method = RequestMethod.GET)
-		public ResponseEntity<String> downloadSinglePage() {
+		@RequestMapping(value = "/downloadAuctionEventFromSearchPage", method = RequestMethod.GET)
+		public ResponseEntity<String> downloadAuctionEventFromSearchPage() {
 			
-			String d = mainSeasonVotesDowloader.execute2();
+			String d = auctionEventDownloader.executeDownloadAuctionEventFromSearchPage();
 //			User p = personDao.findById(1L);
 			String body = "Downloading Single Page COMPLETED";
 			
@@ -46,14 +48,14 @@ public class FacadeController {
 		}
 		
 		// ###################################################
-		// ##########            1                ############
+		// ##########            2                ############
 		// ###################################################
-		
-		@RequestMapping(value = "/downloadAuctionEventPage", method = RequestMethod.GET)
-		public ResponseEntity<String> downloadAuctionEventPage() {
+				
+		@RequestMapping(value = "/downloadAuctionEventDetails", method = RequestMethod.GET)
+		public ResponseEntity<String> downloadAuctionEventDetails() {
 			
-			String d = mainSeasonVotesDowloader.execute3();
-//			User p = personDao.findById(1L);
+			String d = auctionEventDownloader.executeDownloadAuctionEventDetails();
+//					User p = personDao.findById(1L);
 			String body = "Downloading Single Page COMPLETED";
 			
 			ResponseEntity<String> response = new ResponseEntity<String>(d, HttpStatus.OK);
@@ -67,7 +69,7 @@ public class FacadeController {
 	@RequestMapping(value = "/downloadVotes", method = RequestMethod.GET)
 	public ResponseEntity<String> downloadVotes() {
 		
-		mainSeasonVotesDowloader.execute();
+		auctionEventDownloader.execute();
 //		User p = personDao.findById(1L);
 		String body = "Downloading Votes COMPLETED";
 		

@@ -1,6 +1,6 @@
 package app.logic._0_votesDownloader.model;
 
-import java.io.Serializable;
+import java.io.Serializable;	
 
 public enum ProceedingEnum implements Serializable{
 	LIQUIDAZIONE_GIUDIZIALE_CCI("2217", "LIQUIDAZIONE GIUDIZIALE CCI"),

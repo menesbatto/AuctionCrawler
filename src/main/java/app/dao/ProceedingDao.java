@@ -4,12 +4,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 
+import app.dao.entity.Proceeding;
+import app.dao.entity.WareHouseLocation;
+
 @Service
 @EnableCaching
 public class ProceedingDao {
 
 	@Autowired
 	private ProceedingRepo proceedingRepo;
+
+
+	public Proceeding retrieveByNumberAndYear(String number, String year) {
+		Proceeding proceeding = proceedingRepo.findByNumberAndYear(number, year);
+		return proceeding;
+	}
+
 
 //
 //	public void saveGazzettaCredentials(Credentials credentials) {
