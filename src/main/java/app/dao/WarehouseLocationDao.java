@@ -15,7 +15,27 @@ public class WarehouseLocationDao {
 
 
 	public WareHouseLocation retrieveByCityAndStreet(String city, String street) {
-		WareHouseLocation warehouseLocation = warehouseLocationRepo.findByCityAndStreet(city, street);
+		WareHouseLocation warehouseLocation = null;
+		try {
+			warehouseLocation = warehouseLocationRepo.findByCityAndStreet(city, street);
+			return warehouseLocation;
+		}
+		catch (Exception e){
+			System.out.println(city+ " " + street + " " + e);
+		}
+		return warehouseLocation;
+	}
+
+
+	public WareHouseLocation retrieveByCity(String city) {
+		WareHouseLocation warehouseLocation = null;
+		try {
+			warehouseLocation = warehouseLocationRepo.findByCity(city);
+			return warehouseLocation;
+		}
+		catch (Exception e){
+			System.out.println(city+ " " + e);
+		}
 		return warehouseLocation;
 	}
 

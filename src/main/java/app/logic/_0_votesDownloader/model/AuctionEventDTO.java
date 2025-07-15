@@ -29,6 +29,8 @@ public class AuctionEventDTO implements Serializable{
 	
 	private String detailPageUrl;
 	private String auctionPageUrl;
+	
+	private ProcessStatusEnum processStatus;
 
 	public Double getCurrentPriceWithTaxes() {
 		return currentPriceWithTaxes;
@@ -147,13 +149,16 @@ public class AuctionEventDTO implements Serializable{
 	}
 
 
+	
+
 	@Override
 	public String toString() {
 		return "AuctionEventDTO [auction=" + auction + ", sellStartDate=" + sellStartDate + ", sellEndDate="
 				+ sellEndDate + ", sellState=" + sellState + ", sellCode=" + sellCode + ", idPVP=" + idPVP
 				+ ", startPrice=" + startPrice + ", startPriceWithTaxes=" + startPriceWithTaxes + ", currentPrice="
 				+ currentPrice + ", currentPriceWithTaxes=" + currentPriceWithTaxes + ", endPrice=" + endPrice
-				+ ", endPriceWithTaxes=" + endPriceWithTaxes + ", urlDetailPage=" + detailPageUrl + "]";
+				+ ", endPriceWithTaxes=" + endPriceWithTaxes + ", detailPageUrl=" + detailPageUrl + ", auctionPageUrl="
+				+ auctionPageUrl + ", processStatus=" + processStatus + "]";
 	}
 
 
@@ -164,6 +169,16 @@ public class AuctionEventDTO implements Serializable{
 
 	public void setAuctionPageUrl(String auctionPageUrl) {
 		this.auctionPageUrl = auctionPageUrl;
+	}
+
+
+	public ProcessStatusEnum getProcessStatus() {
+		return processStatus;
+	}
+
+
+	public void setProcessStatus(ProcessStatusEnum processStatus) {
+		this.processStatus = processStatus;
 	}
 
 

@@ -11,5 +11,7 @@ public interface WarehouseLocationRepo extends JpaRepository<WareHouseLocation, 
 
 	WareHouseLocation findByCityAndStreet(String city, String street);
 
+	WareHouseLocation findByCity(String city);
+
 
 }

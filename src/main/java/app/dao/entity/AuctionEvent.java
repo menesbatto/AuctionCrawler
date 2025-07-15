@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -40,6 +41,7 @@ public class AuctionEvent {
 	private Double endPrice;				//Prezzo finale 		
 	private Double endPriceWithTaxes;			//Prezzo al momento ha senso solo se l'asta è in corso.
 	
+	@Column(unique = true)
 	private String detailPageUrl;
 	private String auctionPageUrl;
 	private String processState;
@@ -49,6 +51,7 @@ public class AuctionEvent {
     public void ensureId() {
         if (this.detailPageUrl == null) {
             this.detailPageUrl = UUID.randomUUID().toString();
+            this.processState = ProcessStatusEnum.BLOCKED_NO_DETAIL_PAGE.getCode();
         }
     }
 	

@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -59,13 +60,16 @@ public class AuctionEventDownloader {
 		String s;
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
 		Document doc= null;
-		for (int i = 2; i<=2; i++) {
+		for (int i = 13; i<=14; i++) {
 			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
 			doc = HttpUtils2.getHtmlPageLogged(s,"","");
+			
 			List<AuctionEventDTO> extractedAuctionEvents = extractAuctionEvents(doc);
-			auctionEventList.addAll(extractedAuctionEvents);
+//			auctionEventList.addAll(extractedAuctionEvents);
+			System.out.println();
+			auctionEventDao.saveAuctionEvents(extractedAuctionEvents);
 		}
-		auctionEventDao.saveAuctionEvents(auctionEventList);
+		
 //		System.out.println(doc.toString());
 		return doc.toString();
 	}
@@ -76,10 +80,15 @@ public class AuctionEventDownloader {
 		for (AuctionEventDTO dto : auctionEventList) {
 			Document doc = HttpUtils2.getHtmlPageLogged(AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl(),"","");
 //			Document doc = HttpUtils2.getHtmlPageLogged("https://www.astagiudiziaria.com/inserzioni/macchinari-accessori-auto-po-1260-1264255","","");
+			
 			enrichAuctionEventWithDetailPage(dto, doc);
 			auctionEventDao.saveAuctionEvent(dto);
+			
 			List<AuctionEventDTO> createAuctionEventCronology = createAuctionEventCronology(dto, doc);
 			auctionEventDao.saveAuctionEvents(createAuctionEventCronology);
+			
+			System.out.println(dto.getAuction().getDescription()); 
+			System.out.println(createAuctionEventCronology.size());
 		}
 		return "";
 	}
@@ -103,8 +112,12 @@ public class AuctionEventDownloader {
 				dataString = auctionEventProperties.get(0).text();
 				sellState = auctionEventProperties.get(1).text();
 				startPrice = auctionEventProperties.get(2).text();
-				startPrice = UsefulMethods.getCleanNumberString(startPrice);
+//				startPrice = UsefulMethods.getCleanNumberString(startPrice);
 				detailPageUrl = auctionEventProperties.get(3).select("a").attr("href");
+				if (detailPageUrl.equals(""))
+					if ("Corrente".equals(auctionEventProperties.get(3).text()))
+						continue;
+				
 				
 				AuctionEventDTO otherAuctionEvent = new AuctionEventDTO();
 				otherAuctionEvent.setSellStartDate(UsefulMethods.getDate(dataString));
@@ -113,29 +126,80 @@ public class AuctionEventDownloader {
 				otherAuctionEvent.setDetailPageUrl(detailPageUrl!=""?detailPageUrl:null);
 				
 				otherAuctionEvent.setAuction(dto.getAuction());
+				otherAuctionEvent.setProcessStatus(ProcessStatusEnum.BLOCKED_NO_NEED_DETAIL_PAGE);
+				
 				list.add(otherAuctionEvent);
 			}
 		}
 		return list;
 	}
 	private void enrichAuctionEventWithDetailPage(AuctionEventDTO dto, Document doc) {
-		
-		
-		
-		// DA POPOLARE AUCTION EVENT
-			Element infoVendita = doc.getElementById("informazioni-vendita");
 			
+			
+			
+			// DA POPOLARE AUCTION EVENT
+			Element infoVendita = doc.getElementById("informazioni-vendita");
+//			System.out.println(doc);
 			
 			Element dettaglioLotto = doc.getElementById("dettaglio-lotto");
 			Element tabDocumenti= doc.getElementById("tab-documenti");
 	//		other-docs-beni-0
 	//		allDocuments
 			String description = doc.getElementById("description").text();
-			System.out.println();
+//			System.out.println();
 			dto.getAuction().setDescription(description);
 			
 			
 			Element indirizzoLabel = dettaglioLotto.select("div:containsOwn(Indirizzo)").first();
+			
+			
+			Elements select = doc.select("script");
+			String scriptContent = "";
+			for (Element elem : select) {
+				 scriptContent = elem.html(); // contenuto tra <script>...</script>
+	            if (scriptContent.contains("function(a,b,c,d,e,f,g")) {
+//	                System.out.println("SCRIPT TROVATO:");
+//	                System.out.println(scriptContent);
+	                break;
+	            }
+			}
+			//https:\u002F\u002Fsivag.fallcoaste.it\u002Fvendita\u002Flotto-48-4-paia-di-orecchini-in-oro-pietre-coralli-gr-13-75-1260246.html"
+//			System.out.println(scriptContent);
+			try {
+			int	start = scriptContent.indexOf("\"Inizio gara\"");
+			if (start < 0)
+				start = scriptContent.indexOf("annunci\\");
+			else if (start<0) {
+				start = scriptContent.indexOf("vendita\\");
+			}
+//			start = start -100;
+//			if (start < 0)
+//				start = scriptContent.indexOf("ivgreggioemilia")-60;
+			
+			String url = scriptContent.substring(start); // ".html" = 5 caratteri
+			start = url.indexOf("http");
+			url = url.substring(start); // ".html" = 5 caratteri
+			int end = url.indexOf("\"", start);
+			url = url.substring(0, end ); // ".html" = 5 caratteri
+			url = url.replace("\\u002F", "/");
+			
+//			Pattern pattern = Pattern.compile("\"https:(?:\\\\u002F|[^\"\\s])*?\\.html\"");
+//	        Matcher matcher = pattern.matcher(scriptContent);
+//
+//	        String auctionPageUrl = "";
+//	        if (matcher.find()) {
+//	            String raw = matcher.group();
+//	            // Rimuovi virgolette e decodifica \u002F → /
+//	            auctionPageUrl = raw.substring(1, raw.length() - 1).replace("\\u002F", "/");
+//	            System.out.println(auctionPageUrl);
+//	        }
+	        dto.setAuctionPageUrl(url);
+			}
+			catch (Exception e) {
+				System.out.println(scriptContent);
+			}
+			dto.setProcessStatus(ProcessStatusEnum.DETAIL_INFO_DOWNLOADED);
+			
 //			if (indirizzoLabel != null) {
 //			    Element indirizzoValore = indirizzoLabel.parent().select("div").get(2);
 //			    WareHouseLocationDTO warehouseLocation = dto.getAuction().getWarehouseLocation();
@@ -236,7 +300,7 @@ int a = 1;
 			String sellStateString = footerElements.get(4).text();
 			auctionEvent.setSellState(SellStateEnum.findByDescription(sellStateString));
 			
-			
+			auctionEvent.setProcessStatus(ProcessStatusEnum.LIGHT_INFO_DOWNLOADED);
 			auctionEventList.add(auctionEvent);
 			
 //			String gazzettaTeamId = current.attr("data-team");

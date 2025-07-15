@@ -33,7 +33,7 @@ public class Auction {
 	
 	private String court;		//Tribunale				ENUM
 	
-	@Column(length = 1000)
+	@Column(length = 1000, unique = true, nullable = false)
 	private String description;	//Descrizione	
 	
 	

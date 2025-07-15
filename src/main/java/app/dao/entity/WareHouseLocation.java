@@ -1,5 +1,6 @@
 package app.dao.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,6 +15,7 @@ public class WareHouseLocation {
 	private String number;
 	private String cap;
 	private String province;
+	@Column(unique = true)
 	private String city;
 	
 	private String lat;
