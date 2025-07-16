@@ -25,15 +25,18 @@ public class AuctionEvent {
 	@ManyToOne(cascade = {CascadeType.ALL})
 	private Auction auction;
 	
+	@Column(unique = true)
+	private String detailPageUrl;
+	private String auctionPageUrl;
+	private String processState;
+
+	private Double startPrice;			//Prezzo
+	
 	private Date sellStartDate;			//Data Vendita INIZIO
 	private Date sellEndDate;			//Data Vendita FINE
 	
 	
-	private String sellState;		//Stato Vendita 		ENUM
-	private String sellCode;		//Codice Vendita				?????	identificativo dell'auctionEvent in fallcoaste sta 1 a 1 con il idPVP
-	private String idPVP;			//Identificativo PVP (Portale delle Vendite Pubbliche)	identificativo dell'auctionEvent 	- Istanze, Evento, Esperimento dell'asta
 	
-	private Double startPrice;			//Prezzo
 	private Double startPriceWithTaxes;	//Prezzo piu' tasse
 	private Double currentPrice;			//Prezzo al momento ha senso solo se l'asta è in corso.
 	private Double currentPriceWithTaxes;			//Prezzo al momento ha senso solo se l'asta è in corso.
@@ -41,11 +44,10 @@ public class AuctionEvent {
 	private Double endPrice;				//Prezzo finale 		
 	private Double endPriceWithTaxes;			//Prezzo al momento ha senso solo se l'asta è in corso.
 	
-	@Column(unique = true)
-	private String detailPageUrl;
-	private String auctionPageUrl;
-	private String processState;
-
+	private String sellState;		//Stato Vendita 		ENUM
+	private String sellCode;		//Codice Vendita				?????	identificativo dell'auctionEvent in fallcoaste sta 1 a 1 con il idPVP
+	private String idPVP;			//Identificativo PVP (Portale delle Vendite Pubbliche)	identificativo dell'auctionEvent 	- Istanze, Evento, Esperimento dell'asta
+	
 	
 	@PrePersist
     public void ensureId() {

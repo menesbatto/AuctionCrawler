@@ -29,5 +29,14 @@ public enum SellTypeEnum {
 	     return code;
 	}
 
+	public static SellTypeEnum findByDescription(String description){
+	    for(SellTypeEnum v : values()){
+	        if( v.getDescription().equals(description)){
+	            return v;
+	        }
+	    }
+//	    System.out.println(description);
+	    return null;
+	}
 
 }

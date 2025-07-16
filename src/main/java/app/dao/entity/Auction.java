@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -15,6 +16,9 @@ public class Auction {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
+	private String category;	//Categoria				ENUM
+	private String categoryC0;	//Categoria				ENUM
+	private String categoryC1;	//Categoria				ENUM
 	
 	@ManyToOne(cascade = {CascadeType.ALL})
 	private Proceeding proceeding;//numero e anno											evento giudiziario che ha portato alla vendita di vari oggetti
@@ -27,18 +31,19 @@ public class Auction {
 	
 	private String title;
 	
-	private String category;	//Categoria				ENUM
 	private String sellType;	//Tipo vendita			ENUM
 	
-	
-	private String court;		//Tribunale				ENUM
+	private String idIVG;		//Identificativo IVG	ENUM???		
 	
 	@Column(length = 1000, unique = true, nullable = false)
+	@Lob 
 	private String description;	//Descrizione	
+	private String court;		//Tribunale				ENUM
 	
 	
 	
-	private String idIVG;		//Identificativo IVG	ENUM???		
+	
+	
 	
 	
 	
@@ -174,11 +179,37 @@ public class Auction {
 
 
 
+
 	@Override
 	public String toString() {
-		return "Auction [id=" + id + ", proceeding=" + proceeding + ", lotCode=" + lotCode + ", name=" + title
-				+ ", category=" + category + ", sellType=" + sellType + ", location=" + warehouseLocation + ", court=" + court
-				+ ", description=" + description + ", idIVG=" + idIVG + "]";
+		return "Auction [id=" + id + ", proceeding=" + proceeding + ", lotCode=" + lotCode + ", warehouseLocation="
+				+ warehouseLocation + ", title=" + title + ", category=" + category + ", categoryC0=" + categoryC0
+				+ ", categoryC1=" + categoryC1 + ", sellType=" + sellType + ", court=" + court + ", description="
+				+ description + ", idIVG=" + idIVG + "]";
+	}
+
+
+
+	public String getCategoryC0() {
+		return categoryC0;
+	}
+
+
+
+	public void setCategoryC0(String categoryC0) {
+		this.categoryC0 = categoryC0;
+	}
+
+
+
+	public String getCategoryC1() {
+		return categoryC1;
+	}
+
+
+
+	public void setCategoryC1(String categoryC1) {
+		this.categoryC1 = categoryC1;
 	}
 	
 	

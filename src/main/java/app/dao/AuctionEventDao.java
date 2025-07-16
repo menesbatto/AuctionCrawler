@@ -2,7 +2,6 @@ package app.dao;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
@@ -11,12 +10,9 @@ import org.springframework.stereotype.Service;
 import app.dao.entity.Auction;
 import app.dao.entity.AuctionEvent;
 import app.dao.entity.Proceeding;
-import app.dao.entity.User;
-import app.dao.entity.Vote;
 import app.dao.entity.WareHouseLocation;
 import app.logic._0_votesDownloader.model.AuctionDTO;
 import app.logic._0_votesDownloader.model.AuctionEventDTO;
-import app.logic._0_votesDownloader.model.PlayerVoteComplete;
 import app.logic._0_votesDownloader.model.ProcessStatusEnum;
 import app.logic._0_votesDownloader.model.WareHouseLocationDTO;
 
@@ -35,26 +31,42 @@ public class AuctionEventDao {
 
 
 	public void saveAuctionEvent(AuctionEventDTO dto) {
-		AuctionEvent ent;
+		AuctionEvent ent = null;
+		
 		if (dto.getDetailPageUrl()!= null) {
 			ent = auctionEventRepo.findByDetailPageUrl(dto.getDetailPageUrl());
 
 			if (ent == null)
-				ent = populateVote(dto);
-			else {
-				ent.getAuction().setDescription(dto.getAuction().getDescription());
-				ent.setProcessState(dto.getProcessStatus().getCode());
-			//// DA POPOLARE AUCTION EVENT
-			}
+				ent = new AuctionEvent();
+			
+			ent = populateVote(dto, ent);
 		}
 		else {
-			ent = populateVote(dto);
+			System.out.println("errore dto.getDetailPageUrl() == NULL");
 		}
+		
+		
+//		if (dto.getDetailPageUrl()!= null) {
+//			ent = auctionEventRepo.findByDetailPageUrl(dto.getDetailPageUrl());
+//
+//			if (ent == null)
+//				ent = populateVote(dto);
+//			else {
+//				ent.getAuction().setDescription(dto.getAuction().getDescription());
+//				ent.setAuctionPageUrl(dto.getAuctionPageUrl());
+//				ent.setProcessState(dto.getProcessStatus().getCode());
+//				ent
+//			//// DA POPOLARE AUCTION EVENT
+//			}
+//		}
+//		else {
+//			ent = populateVote(dto);
+//		}
 		try {
 			auctionEventRepo.save(ent);
 		}
 		catch (Exception e) {
-			 
+			 e.printStackTrace();
 			System.out.println(ent.getAuction().getDescription());
 		}
 	}
@@ -71,11 +83,12 @@ public class AuctionEventDao {
 			catch(Exception e) {
 				System.out.println(e);
 			}
-			if (ent==null) {
-				ent = populateVote(dto);
-//				entList.add(ent);
-				auctionEventRepo.save(ent);
-			}
+			if (ent==null) 
+				ent = new AuctionEvent();
+			
+			ent = populateVote(dto, ent);
+			auctionEventRepo.save(ent);
+			
 //			else {
 //				ent.getAuction().setDescription(dto.getAuction().getDescription());
 //				
@@ -93,74 +106,82 @@ public class AuctionEventDao {
 		}
 	}
 
-	private AuctionEvent populateVote(AuctionEventDTO dto) {
+	private AuctionEvent populateVote(AuctionEventDTO dto, AuctionEvent ent) {
 //		 ent = null;
 //		AuctionEvent ents = auctionEventRepo.findByDetailPageUrl(dto.getDetailPageUrl());
 //		if (ents==null) {
 		// 	AUCTION EVENT
-			AuctionEvent ent = new AuctionEvent();
 
 			// 	AUCTION EVENT	AUCTION
 			AuctionDTO auctionDTO = dto.getAuction();
-			Auction auction = auctionRepo.findByDescription(auctionDTO.getDescription());
+			Auction auction = null;
+			try {
+				auction = auctionRepo.findByDescription(auctionDTO.getDescription());
+			}
+			catch (Exception e) {
+				System.out.println(e);
+			}
 			if (auction==null) {
 				auction = new Auction();
-			
-				if (auctionDTO.getCategoryMacro()!= null)
-					auction.setCategory(auctionDTO.getCategoryMacro().getDescription());
-				if (auctionDTO.getCourt()!= null) 
-					auction.setCourt(auctionDTO.getCourt().getDescription());
-				auction.setDescription(auctionDTO.getDescription());
-				if (auctionDTO.getIdIVG()!= null) 
-					auction.setIdIVG(auctionDTO.getIdIVG().getDescription());
-				auction.setLotCode(auctionDTO.getLotCode());
-				auction.setTitle(auctionDTO.getTitle());
-
-			
-				// 	AUCTION EVENT	AUCTION		PROCEEDING
-				if (auctionDTO.getProceeding()!= null) {
-					String description = auctionDTO.getProceeding().getDescription();
-					String number = auctionDTO.getProceeding().getNumber();
-					String year = auctionDTO.getProceeding().getYear();
-					try {
-						Proceeding proceeding = proceedingDao.retrieveByNumberAndYear(number, year);
-						
-						
-						if (proceeding == null) {
-							proceeding= new Proceeding();
-							proceeding.setDescription(description);
-							proceeding.setNumber(number);
-							proceeding.setYear(year);
-						}		
-						auction.setProceeding(proceeding);
-					}
-					catch (Exception e) {
-						System.out.println();
-					}
-				}
-				
-				if (auctionDTO.getSellType()!=null)
-					auction.setSellType(auctionDTO.getSellType().getDescription());
+			}
+			if (auctionDTO.getCategoryMacro()!= null)
+				auction.setCategory(auctionDTO.getCategoryMacro().getDescription());
+			if (auctionDTO.getCategoryC0()!= null)
+				auction.setCategoryC0(auctionDTO.getCategoryC0().getDescription());
+			if (auctionDTO.getCategoryC1()!= null)
+				auction.setCategoryC1(auctionDTO.getCategoryC1().getDescription());
+			if (auctionDTO.getCourt()!= null) 
+				auction.setCourt(auctionDTO.getCourt().getDescription());
+			if (auctionDTO.getIdIVG()!= null) 
+				auction.setIdIVG(auctionDTO.getIdIVG().getDescription());
+			auction.setLotCode(auctionDTO.getLotCode());
+			auction.setTitle(auctionDTO.getTitle());
+			auction.setDescription(auctionDTO.getDescription());
 		
-				// 	AUCTION EVENT	AUCTION		WAREHOUSE LOCATION
-				WareHouseLocationDTO locationDTO = auctionDTO.getWarehouseLocation();
-				if (locationDTO != null) {
-					String street = locationDTO.getStreet();
-					String city = locationDTO.getCity();
-					WareHouseLocation location = warehouseLocationDao.retrieveByCity(city);
-					if (location == null) {
-						location = new WareHouseLocation();
-						location.setCap(locationDTO.getCap());
-						location.setCity(city);
-						location.setLat(locationDTO.getLat());
-						location.setLon(locationDTO.getLon());
-						location.setNumber(locationDTO.getNumber());
-						location.setProvince(locationDTO.getProvince());
-						location.setStreet(street);
-					}
-					auction.setWarehouseLocation(location);
+			// 	AUCTION EVENT	AUCTION		PROCEEDING
+			if (auctionDTO.getProceeding()!= null) {
+				String description = auctionDTO.getProceeding().getDescription();
+				String number = auctionDTO.getProceeding().getNumber();
+				String year = auctionDTO.getProceeding().getYear();
+				try {
+					Proceeding proceeding = proceedingDao.retrieveByNumberAndYear(number, year);
+					
+					
+					if (proceeding == null) {
+						proceeding= new Proceeding();
+						proceeding.setDescription(description);
+						proceeding.setNumber(number);
+						proceeding.setYear(year);
+					}		
+					auction.setProceeding(proceeding);
+				}
+				catch (Exception e) {
+					System.out.println();
 				}
 			}
+			
+			if (auctionDTO.getSellType()!=null)
+				auction.setSellType(auctionDTO.getSellType().getDescription());
+	
+			// 	AUCTION EVENT	AUCTION		WAREHOUSE LOCATION
+			WareHouseLocationDTO locationDTO = auctionDTO.getWarehouseLocation();
+			if (locationDTO != null) {
+				String street = locationDTO.getStreet();
+				String city = locationDTO.getCity();
+				WareHouseLocation location = warehouseLocationDao.retrieveByCity(city);
+				if (location == null) {
+					location = new WareHouseLocation();
+					location.setCap(locationDTO.getCap());
+					location.setCity(city);
+					location.setLat(locationDTO.getLat());
+					location.setLon(locationDTO.getLon());
+					location.setNumber(locationDTO.getNumber());
+					location.setProvince(locationDTO.getProvince());
+					location.setStreet(street);
+				}
+				auction.setWarehouseLocation(location);
+			}
+		
 			ent.setAuction(auction);
 			
 			
@@ -173,7 +194,8 @@ public class AuctionEventDao {
 			ent.setSellCode(dto.getSellCode());
 			ent.setSellEndDate(dto.getSellEndDate());
 			ent.setSellStartDate(dto.getSellStartDate());
-			ent.setSellState(dto.getSellState().getDescription());
+			if (dto.getSellState()!= null)
+				ent.setSellState(dto.getSellState().getDescription());
 			ent.setStartPrice(dto.getStartPrice());
 			ent.setStartPriceWithTaxes(dto.getStartPriceWithTaxes());
 			

@@ -3,7 +3,7 @@ package app.logic._0_votesDownloader.model;
 import java.io.Serializable;
 
 public enum CategoryMacroEnum implements Serializable{
-	BENI_IMMOBILI("","BENI IMMOBILI") , BENI_MOBILI("591","BENI MOBILI"), CREDITI_VALORI("","CREDITI VALORI"), AZIENDE("","AZIENDE"), ALTRO("","ALTRO");
+	BENI_IMMOBILI("","IMMOBILI") , BENI_MOBILI("591","MOBILI"), CREDITI_VALORI("","CREDITI VALORI"), AZIENDE("","AZIENDE"), ALTRO("","ALTRO");
 
 
 	private final String code;
@@ -14,6 +14,16 @@ public enum CategoryMacroEnum implements Serializable{
 	        this.description = description;
 	    }
 
+	public static CategoryMacroEnum findByDescription(String description){
+	    for(CategoryMacroEnum v : values()){
+	        if( v.getDescription().equals(description)){
+	            return v;
+	        }
+	    }
+//	    System.out.println(description);
+	    return null;
+	}
+	
 	    public String getCode() {
 	        return code;
 	    }
