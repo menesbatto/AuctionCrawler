@@ -8,7 +8,7 @@ import app.dao.entity.Auction;
 @RepositoryRestResource
 public interface AuctionRepo extends JpaRepository<Auction, Long> {
 
-	Auction findByDescription(String description);
+	Auction findByTitle(String description);
 
 
 }

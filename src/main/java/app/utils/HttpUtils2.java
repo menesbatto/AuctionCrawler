@@ -2,12 +2,15 @@ package app.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.List;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -41,14 +44,103 @@ public class HttpUtils2 {
 	}
 	
 	
+	public static String getAuctionPagelFromDetailPage(String url) {
+//		if (getLoggedWebDriver() == null)
+//			initLoggedWebDriver("", "");
+//		
+//		getLoggedWebDriver().get(url);
+		
+		
+		// CHIUDO SOLO LA PRIMA VOLTA I COOKIE
+		List<WebElement> closeCookieButtons = getLoggedWebDriver().findElements((By.className("iubenda-cs-accept-btn")));
+		WebDriverWait wait;
+		WebElement closeButton;
+		if (closeCookieButtons.size()==1) {
+			closeButton = closeCookieButtons.get(0);
+			wait = new WebDriverWait(getLoggedWebDriver(),5);
+//	    	wait.until(ExpectedConditions.presenceOfElementLocated(By.className("qc-cmp-button")));
+			try {
+				closeButton.click();
+			}
+			catch(org.openqa.selenium.StaleElementReferenceException ex)
+		    {
+				System.out.println("Errore");
+//		    	loginBtnPage = getLoggedWebDriver().findElement(By.className("hidden-logged")); 
+//		    	loginBtnPage.click();
+		    }
+		}
+		// CLICCO SUL BUTTON PER AVERE IL BUTTON COL LINK AL SITO DELL'ASTA
+		List<WebElement> showLinkButtons = getLoggedWebDriver().findElements(By.xpath("//button[contains(text(), 'alla gara online')]"));
+		if (showLinkButtons.isEmpty())
+			return "NON PRESENTE";
+			
+		WebElement showLinkButton = showLinkButtons.get(1);
+//		JavascriptExecutor js = (JavascriptExecutor) getLoggedWebDriver();
+//		js.executeScript("document.body.style.zoom='80%'");
+//		js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+//		js.executeScript("var element = document.body; while (element.scrollHeight - element.scrollTop > element.clientHeight) { " +
+//                "if (element.innerText.includes('Della stessa procedura')) { element.scrollTop = element.scrollHeight; break; }" +
+//                "element = element.nextElementSibling; }");
+		try {
+			showLinkButton.click();
+	    }
+	    catch( org.openqa.selenium.StaleElementReferenceException ex)
+	    {
+	    	showLinkButton = getLoggedWebDriver().findElement(By.className("hidden-logged")); 
+	    	showLinkButton.click();
+	    }
+		catch (Exception ex) {
+			System.out.println("");
+		}
+		// RECUPERO IL LINK AL BUTTON
+		 wait = new WebDriverWait(getLoggedWebDriver(),5);
+		 
+		 List<WebElement> links = getLoggedWebDriver().findElements(By.tagName("a"));
+		 String auctionSiteUrl = null;
+	        // Cicla su tutti gli elementi <a> per trovare quello con title="Gara online"
+	        for (WebElement link : links) {
+	            // Controlla se l'attributo title è uguale a "Gara online"
+	            if (link.getAttribute("title").equals("Gara online")) {
+	                // Stampa il valore dell'attributo href
+	            	auctionSiteUrl= link.getAttribute("href");
+ 	            	System.out.println("href: " + link.getAttribute("href"));
+	                break; // Interrompe il ciclo una volta trovato l'elemento desiderato
+	            }
+	        }
+//		 System.out.println();
+//		 WebElement link = getLoggedWebDriver().findElement(By.id("__BVID__110___BV_modal_body_"));
+//		 String auctionSiteUrl = link.findElement(By.className("btn-default ")).getAttribute("href");
+		 return auctionSiteUrl;
+
+				 
+				 //		closeButton = getLoggedWebDriver().findElements(By.xpath("//button[contains(text(), 'alla gara online')]")).get(0);
+//		closeButton.getAttribute("href");
+//	   WebElement loginButtonModal = getLoggedWebDriver().findElement(By.id("buttonLogin"));
+//	    wait = new WebDriverWait(getLoggedWebDriver(),5);
+//	    wait.until(ExpectedConditions.elementToBeClickable(loginButtonModal));
+//		
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//	    String pageSource = getLoggedWebDriver().getPageSource();
+//		doc = Jsoup.parse(pageSource);
+//		
+//		return doc;
+		
+	}
 	public static Document getHtmlPageLogged(String url, String username, String password){
+//		WebElement loginBtnPage = getLoggedWebDriver().findElement(By.xpath("//button[@type='button' and normalize-space(text())='Vai alla gara online']"));
+//		loginBtnPage.click();
 		Document doc = null;
-		System.out.print(".");
+//		System.out.print(".");
 		
 		try {
 
 			if (getLoggedWebDriver() == null)
 				initLoggedWebDriver(username, password);
+			
 			
 			Thread.sleep(1000);
 			
@@ -94,10 +186,12 @@ public class HttpUtils2 {
 		//		champDriver.navigate().refresh();
 		//		WebElement navBar   = driver.findElement(By.id("myNav"));
 //				
-//				WebElement loginBtnPage = driver.findElement(By.className("hidden-logged")); 
+				
+				//driver.findElement(By.className("hidden-logged")); 
 //				WebDriverWait wait = new WebDriverWait(driver,5);
 //			    wait.until(ExpectedConditions.presenceOfElementLocated(By.className("qc-cmp-button")));
-//
+			    
+			    
 //				WebElement cookieInfoCloseButton = driver.findElement(By.className("qc-cmp-button"));
 //				WebDriverWait wait2 = new WebDriverWait(driver,2);
 //				wait2.until(ExpectedConditions.elementToBeClickable(cookieInfoCloseButton));
@@ -237,6 +331,7 @@ public class HttpUtils2 {
 		options.addArguments("--allow-file-access-from-files");
 		options.addArguments("--verbose");
 		options.addArguments("load-extension=C:\\Users\\Menesbatto-PC\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\cfhdojbkjhnklbpkdaibdccddilifddb\\3.4.3_0");
+		options.addArguments("--start-maximized");
 		//C:\Users\Menesbatto-PC\AppData\Local\Google\Chrome\User Data\Default\Extensions\cfhdojbkjhnklbpkdaibdccddilifddb\3.3.2_1
 		capabilities.setVersion("");
 		capabilities.setCapability(ChromeOptions.CAPABILITY, options);
@@ -257,7 +352,8 @@ public class HttpUtils2 {
 		}
 		driver.switchTo().window(originalHandle);
 		
-		
+	    JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("document.body.style.zoom='80%'");
 		return driver;
 	}
 

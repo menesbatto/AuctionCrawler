@@ -28,14 +28,15 @@ public class Auction {
 	@OneToOne(cascade = {CascadeType.ALL})
 	private WareHouseLocation warehouseLocation;	//Località  			
 	
-	
+	@Column(length = 500, unique = true, nullable = false)
+	@Lob 
 	private String title;
 	
 	private String sellType;	//Tipo vendita			ENUM
 	
 	private String idIVG;		//Identificativo IVG	ENUM???		
 	
-	@Column(length = 1000, unique = true, nullable = false)
+	@Column(length = 1000)
 	@Lob 
 	private String description;	//Descrizione	
 	private String court;		//Tribunale				ENUM

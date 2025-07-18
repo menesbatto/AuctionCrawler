@@ -41,11 +41,11 @@ public class AuctionEventDownloader {
 		String s;
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
 		Document doc= null;
-		for (int i = 23; i<=23 ; i++) {
+		for (int i = 1; i<=4 ; i++) {
 			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
 			doc = HttpUtils2.getHtmlPageLogged(s,"","");
 			
-			List<AuctionEventDTO> extractedAuctionEvents = extractAuctionEvents(doc);
+ 			List<AuctionEventDTO> extractedAuctionEvents = extractAuctionEvents(doc);
 			auctionEventList.addAll(extractedAuctionEvents);
 			auctionEventDao.saveAuctionEvents(extractedAuctionEvents);
 			
@@ -56,18 +56,23 @@ public class AuctionEventDownloader {
 	
 	
 	public String executeDownloadAuctionEventDetails(){
+		
 		List<AuctionEventDTO> auctionEventList = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.LIGHT_INFO_DOWNLOADED);
 		for (AuctionEventDTO dto : auctionEventList) {
 			Document doc = HttpUtils2.getHtmlPageLogged(AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl(),"","");
-//			Document doc = HttpUtils2.getHtmlPageLogged("https://www.astagiudiziaria.com/inserzioni/macchinari-accessori-auto-po-1260-1264255","","");
+			
 			enrichAuctionEventWithDetailPage(dto, doc);
 			auctionEventDao.saveAuctionEvent(dto);
+			String auctionPageUrl = HttpUtils2.getAuctionPagelFromDetailPage("https://www.astagiudiziaria.com/inserzioni/macchinari-accessori-auto-po-1260-1264255");
+			System.out.println(auctionPageUrl);
+			System.out.println("#################");
+			dto.setAuctionPageUrl(auctionPageUrl);
 //			System.out.println();
 			List<AuctionEventDTO> createAuctionEventCronology = createAuctionEventCronology(dto, doc);
-			auctionEventDao.saveAuctionEvents(createAuctionEventCronology);
 			
+			auctionEventDao.saveAuctionEvents(createAuctionEventCronology);
 //			System.out.println(dto.getAuction().getDescription()); 
-			System.out.println(createAuctionEventCronology.size());
+//			System.out.println(createAuctionEventCronology.size());
 		}
 		return "";
 	}
@@ -103,7 +108,6 @@ public class AuctionEventDownloader {
 				otherAuctionEvent.setSellState(SellStateEnum.findByDescription(sellState.toUpperCase()));
 				otherAuctionEvent.setStartPrice(Double.valueOf(startPrice));
 				otherAuctionEvent.setDetailPageUrl(detailPageUrl!=""?detailPageUrl:null);
-				
 				otherAuctionEvent.setAuction(dto.getAuction());
 				otherAuctionEvent.setProcessStatus(ProcessStatusEnum.BLOCKED_NO_NEED_DETAIL_PAGE);
 				
@@ -124,9 +128,16 @@ public class AuctionEventDownloader {
 //			System.out.println();
 
 		AuctionDTO auctionDTO = dto.getAuction();
-		
-		String description = doc.getElementById("description").text();
-		auctionDTO.setDescription(description);
+		try {
+			String description = doc.getElementById("description").text();
+			auctionDTO.setDescription(description);
+		}
+		catch (Exception e) {
+			dto.setProcessStatus(ProcessStatusEnum.BLOCKED_NO_DETAIL_PAGE);
+			String retu = "Errore" ;
+			System.out.println("Errora manca ID");
+			return;
+		}
 		
 		String sellEndDateString = null;
 		String courtString = null;
@@ -180,7 +191,7 @@ public class AuctionEventDownloader {
 		        	addressString = value;
             }
         }
-        if (startPriceString!= null) {
+        if (	startPriceString!= null && !startPriceString.equals("Non presente"))  {
         	startPriceString = UsefulMethods.getCleanNumberString(startPriceString);
         	dto.setStartPrice(new Double(startPriceString));
         }
@@ -258,14 +269,23 @@ public class AuctionEventDownloader {
 				start = scriptContent.indexOf("linkInserzionePvp");
 			
 //			System.out.println(scriptContent);
-			String url = scriptContent.substring(start); // ".html" = 5 caratteri
-			start = url.indexOf("http");
-			url = url.substring(start); // ".html" = 5 caratteri
-			int end = url.indexOf("\"", start);
-			url = url.substring(0, end ); // ".html" = 5 caratteri
-			url = url.replace("\\u002F", "/");
-			dto.setAuctionPageUrl(url);
-		System.out.println(url);
+//			String url = scriptContent.substring(start); // ".html" = 5 caratteri
+//			start = url.indexOf("http");
+//			url = url.substring(start); // ".html" = 5 caratteri
+//			int end = url.indexOf("\"", start);
+//			url = url.substring(0, end ); // ".html" = 5 caratteri
+//			url = url.replace("\\u002F", "/");
+//			dto.setAuctionPageUrl(url);
+//			if (url.length()>255) {
+//				System.out.print ("Errore" + " - ");
+//				System.out.println(url);
+//				System.out.println(scriptContent);
+//				System.out.println(doc);
+//				doc.select("button[type=button]:containsOwn(Vai alla gara online)");
+//				
+//			}
+				
+		
 //			Pattern pattern = Pattern.compile("\"https:(?:\\\\u002F|[^\"\\s])*?\\.html\"");
 //	        Matcher matcher = pattern.matcher(scriptContent);
 //
@@ -316,10 +336,10 @@ public class AuctionEventDownloader {
 			String ivgString = current.getElementsByClass("badge").get(0).text();
 			auctionEvent.getAuction().setIdIVG(IVGEnum.findByDescription(ivgString));
 			
-			String description = current.getElementsByClass("asta-card-title").get(0).text();
-			auctionEvent.getAuction().setDescription(description);
+			String title = current.getElementsByClass("asta-card-title").get(0).text();
+			auctionEvent.getAuction().setTitle(title);
 			
-			System.out.println(i++ + " - " + description);
+			System.out.println(i++ + " - " + title);
 			
 			
 			String categoryC0String = current.getElementsByClass("category-label").get(0).text();
@@ -334,11 +354,18 @@ public class AuctionEventDownloader {
 int a = 1;			
 			String priceString = current.getElementsByClass("price-tag").get(0).text();
 			if (priceString.equals("Vendita a lotti singoli")) {
-			
+				auctionEvent.setStartPrice(new Double(0));
 			}
 			else if (priceString.equals("Non presente")) {
 				auctionEvent.setStartPrice(new Double(0));
-			} else {
+			} 
+			else if (priceString.equals("Offerta libera")) {
+				auctionEvent.setStartPrice(new Double(0));
+			} 
+//			else if (priceString.equals("OFFERTA LIBERA")) {
+//				auctionEvent.setStartPrice(new Double(0));
+//			} 
+			else {
 				priceString = UsefulMethods.getCleanNumberString(priceString);
 				try {
 					auctionEvent.setStartPrice(new Double(priceString));

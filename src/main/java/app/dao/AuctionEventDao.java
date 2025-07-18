@@ -66,8 +66,9 @@ public class AuctionEventDao {
 			auctionEventRepo.save(ent);
 		}
 		catch (Exception e) {
-			 e.printStackTrace();
+//			 e.printStackTrace();
 			System.out.println(ent.getAuction().getDescription());
+			System.out.println();
 		}
 	}
 	
@@ -85,6 +86,9 @@ public class AuctionEventDao {
 			}
 			if (ent==null) 
 				ent = new AuctionEvent();
+			//CONTROLLA
+			if (ProcessStatusEnum.DETAIL_INFO_DOWNLOADED.getCode().equals(ent.getProcessState()))
+				dto.setProcessStatus(ProcessStatusEnum.DETAIL_INFO_DOWNLOADED);
 			
 			ent = populateVote(dto, ent);
 			auctionEventRepo.save(ent);
@@ -116,10 +120,17 @@ public class AuctionEventDao {
 			AuctionDTO auctionDTO = dto.getAuction();
 			Auction auction = null;
 			try {
-				auction = auctionRepo.findByDescription(auctionDTO.getDescription());
+				auction = auctionRepo.findByTitle(auctionDTO.getTitle());
 			}
 			catch (Exception e) {
 				System.out.println(e);
+			}
+			if (auction == null )	{					// Se è il primo AuctionEvent che metto dalla home e quindi ancora non c'è l'auction
+				if (ent.getDetailPageUrl() != null){	// Se a DB l'autctionEvent è presente. A DB è sempre presente
+					System.out.println("Errore la pagina del dettaglio non funziona piu'");
+					ent.setProcessState(ProcessStatusEnum.BLOCKED_NO_DETAIL_PAGE.getCode());
+					return ent;
+				}
 			}
 			if (auction==null) {
 				auction = new Auction();

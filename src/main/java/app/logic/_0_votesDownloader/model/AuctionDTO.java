@@ -126,10 +126,10 @@ public class AuctionDTO implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AuctionDTO [proceeding=" + proceeding + ", \nlotCode=" + lotCode + ", \nwarehouseLocation="
-				+ warehouseLocation + ", \nname=" + title + ", \ncategoryMacro=" + categoryMacro + ", \ncategoryC0="
-				+ categoryC0 + ", \ncategoryC1=" + categoryC1 + ", \nsellType=" + sellType + ", \ncourt=" + court
-				+ ", \ndescription=" + description + ", \nidIVG=" + idIVG + "]";
+		return "AuctionDTO [proceeding=" + proceeding + ", lotCode=" + lotCode + ", warehouseLocation="
+				+ warehouseLocation + ", title=" + title + ", categoryMacro=" + categoryMacro + ", categoryC0="
+				+ categoryC0 + ", categoryC1=" + categoryC1 + ", sellType=" + sellType + ", court=" + court
+				+ ", description=" + description + ", idIVG=" + idIVG + "]";
 	}
 
 
