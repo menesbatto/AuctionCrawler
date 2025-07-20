@@ -29,6 +29,37 @@ public class HttpUtils2 {
 
 	private static WebDriver loggedWebDriver;
 	
+	
+	public static Document getHtmlPageLogged(String url, String username, String password){
+//		WebElement loginBtnPage = getLoggedWebDriver().findElement(By.xpath("//button[@type='button' and normalize-space(text())='Vai alla gara online']"));
+//		loginBtnPage.click();
+		Document doc = null;
+//		System.out.print(".");
+	
+		try {
+
+			if (getLoggedWebDriver() == null)
+				initLoggedWebDriver(username, password);
+			
+			
+			Thread.sleep(1000);
+			
+			getLoggedWebDriver().get(url);
+			Thread.sleep(1000);
+		    String pageSource = getLoggedWebDriver().getPageSource();
+			doc = Jsoup.parse(pageSource);
+			
+		}
+		catch (Exception e){
+			setLoggedWebDriver(null);
+			System.out.print("Errore durante il recupero della pagina");
+		}
+		
+		return doc;
+		
+	}
+	
+	
 
 	public static Document getHtmlPageNoLogged(String url){
 		Document doc = null;
@@ -45,30 +76,14 @@ public class HttpUtils2 {
 	
 	
 	public static String getAuctionPagelFromDetailPage(String url) {
-//		if (getLoggedWebDriver() == null)
-//			initLoggedWebDriver("", "");
-//		
+		if (getLoggedWebDriver() == null)
+			initLoggedWebDriver("", "");
+		
 //		getLoggedWebDriver().get(url);
 		
-		
 		// CHIUDO SOLO LA PRIMA VOLTA I COOKIE
-		List<WebElement> closeCookieButtons = getLoggedWebDriver().findElements((By.className("iubenda-cs-accept-btn")));
 		WebDriverWait wait;
-		WebElement closeButton;
-		if (closeCookieButtons.size()==1) {
-			closeButton = closeCookieButtons.get(0);
-			wait = new WebDriverWait(getLoggedWebDriver(),5);
-//	    	wait.until(ExpectedConditions.presenceOfElementLocated(By.className("qc-cmp-button")));
-			try {
-				closeButton.click();
-			}
-			catch(org.openqa.selenium.StaleElementReferenceException ex)
-		    {
-				System.out.println("Errore");
-//		    	loginBtnPage = getLoggedWebDriver().findElement(By.className("hidden-logged")); 
-//		    	loginBtnPage.click();
-		    }
-		}
+
 		// CLICCO SUL BUTTON PER AVERE IL BUTTON COL LINK AL SITO DELL'ASTA
 		List<WebElement> showLinkButtons = getLoggedWebDriver().findElements(By.xpath("//button[contains(text(), 'alla gara online')]"));
 		if (showLinkButtons.isEmpty())
@@ -130,34 +145,28 @@ public class HttpUtils2 {
 //		return doc;
 		
 	}
-	public static Document getHtmlPageLogged(String url, String username, String password){
-//		WebElement loginBtnPage = getLoggedWebDriver().findElement(By.xpath("//button[@type='button' and normalize-space(text())='Vai alla gara online']"));
-//		loginBtnPage.click();
-		Document doc = null;
-//		System.out.print(".");
-		
-		try {
 
-			if (getLoggedWebDriver() == null)
-				initLoggedWebDriver(username, password);
-			
-			
-			Thread.sleep(1000);
-			
-			getLoggedWebDriver().get(url);
-			Thread.sleep(1000);
-		    String pageSource = getLoggedWebDriver().getPageSource();
-			doc = Jsoup.parse(pageSource);
-			
+
+	private static void closePopupCookie() {
+		List<WebElement> closeCookieButtons = getLoggedWebDriver().findElements((By.className("iubenda-cs-accept-btn")));
+		WebDriverWait wait;
+		WebElement closeButton;
+		if (closeCookieButtons.size()==1) {
+			closeButton = closeCookieButtons.get(0);
+			wait = new WebDriverWait(getLoggedWebDriver(),5);
+//	    	wait.until(ExpectedConditions.presenceOfElementLocated(By.className("qc-cmp-button")));
+			try {
+				closeButton.click();
+			}
+			catch(org.openqa.selenium.StaleElementReferenceException ex)
+		    {
+				System.out.println("Errore");
+//		    	loginBtnPage = getLoggedWebDriver().findElement(By.className("hidden-logged")); 
+//		    	loginBtnPage.click();
+		    }
 		}
-		catch (Exception e){
-			setLoggedWebDriver(null);
-			System.out.print("Errore durante il recupero della pagina");
-		}
-		
-		return doc;
-		
 	}
+	
 //	
 //	public static Document loginOnFantagazzetta(String username, String password) {
 //		if (loggedWebDriver == null)
@@ -178,11 +187,12 @@ public class HttpUtils2 {
 			try {
 				// 1 - Crea driver pronto per navigare
 				driver = initDriver();
-				
+				System.out.println();
 				// 2 - Esegui login su fantagazzetta
 				String url = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL;
 				
 				driver.get(url);
+				
 		//		champDriver.navigate().refresh();
 		//		WebElement navBar   = driver.findElement(By.id("myNav"));
 //				
@@ -221,6 +231,7 @@ public class HttpUtils2 {
 //			   
 //			    // 3 - Setta il Web Driver nel field della classe
 			    setLoggedWebDriver(driver);
+			    closePopupCookie();
 			    break;
 			}
 			catch (Exception e) {
@@ -354,6 +365,9 @@ public class HttpUtils2 {
 		
 	    JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("document.body.style.zoom='80%'");
+        Thread.sleep(1000);
+        
+        
 		return driver;
 	}
 

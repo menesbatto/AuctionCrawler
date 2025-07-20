@@ -28,6 +28,7 @@ public class AuctionEventDao {
 	private ProceedingDao proceedingDao;
 	@Autowired
 	private WarehouseLocationDao warehouseLocationDao;
+	private int z = 1;
 
 
 	public void saveAuctionEvent(AuctionEventDTO dto) {
@@ -64,10 +65,11 @@ public class AuctionEventDao {
 //		}
 		try {
 			auctionEventRepo.save(ent);
+			System.out.println("auction event salvato");
 		}
 		catch (Exception e) {
 //			 e.printStackTrace();
-			System.out.println(ent.getAuction().getDescription());
+			System.out.println("errore salvataggio auctionevent a db" +  ent.getAuction().getDescription());
 			System.out.println();
 		}
 	}
@@ -77,6 +79,7 @@ public class AuctionEventDao {
 		
 		AuctionEvent ent = null;
 //		List<AuctionEvent> entList = new ArrayList<>();
+//		z=1;
 		for (AuctionEventDTO dto : dtoList) {
 			try {
 				ent = auctionEventRepo.findByDetailPageUrl(dto.getDetailPageUrl());
@@ -91,6 +94,7 @@ public class AuctionEventDao {
 				dto.setProcessStatus(ProcessStatusEnum.DETAIL_INFO_DOWNLOADED);
 			
 			ent = populateVote(dto, ent);
+			System.out.println("auction event save DB " + z++ + " - " + ent.getAuction().getTitle());
 			auctionEventRepo.save(ent);
 			
 //			else {
@@ -111,16 +115,27 @@ public class AuctionEventDao {
 	}
 
 	private AuctionEvent populateVote(AuctionEventDTO dto, AuctionEvent ent) {
-//		 ent = null;
-//		AuctionEvent ents = auctionEventRepo.findByDetailPageUrl(dto.getDetailPageUrl());
-//		if (ents==null) {
 		// 	AUCTION EVENT
 
 			// 	AUCTION EVENT	AUCTION
 			AuctionDTO auctionDTO = dto.getAuction();
 			Auction auction = null;
 			try {
-				auction = auctionRepo.findByTitle(auctionDTO.getTitle());
+				String number = auctionDTO.getProceeding().getNumber();
+				String year = auctionDTO.getProceeding().getYear();
+				Proceeding proceeding = proceedingDao.retrieveByNumberAndYear(number, year);
+				
+				String lotCode = auctionDTO.getLotCode();
+				
+				String title = auctionDTO.getTitle();
+//				auction = auctionRepo.findByTitle(auctionDTO.getTitle());
+				
+				auction = auctionRepo.findByProceedingAndLotCodeAndTitle(proceeding, lotCode, title);
+//				CONTROLLA DA QUA
+//				auction = auctionRepo.findByTitle(auctionDTO.getTitle());
+				if (auction!= null) {
+					System.out.println("dao auction - proceeding presente");
+				}
 			}
 			catch (Exception e) {
 				System.out.println(e);

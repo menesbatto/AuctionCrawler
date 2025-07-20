@@ -19,6 +19,7 @@ import app.logic._0_votesDownloader.model.CategoryC0Enum;
 import app.logic._0_votesDownloader.model.CategoryC1Enum;
 import app.logic._0_votesDownloader.model.CategoryMacroEnum;
 import app.logic._0_votesDownloader.model.CourtEnum;
+import app.logic._0_votesDownloader.model.FilterDTO;
 import app.logic._0_votesDownloader.model.IVGEnum;
 import app.logic._0_votesDownloader.model.ProceedingDTO;
 import app.logic._0_votesDownloader.model.ProcessStatusEnum;
@@ -37,11 +38,17 @@ public class AuctionEventDownloader {
 	@Autowired
 	private AuctionEventDao auctionEventDao;
 	
-	public String executeDownloadAuctionEventFromSearchPage(){
+	private int z = 1;
+	
+
+	
+	
+	
+	public String downloadAuctionEventFromSearchPage(){
 		String s;
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
 		Document doc= null;
-		for (int i = 1; i<=4 ; i++) {
+		for (int i = 1; i<=1 ; i++) {
 			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
 			doc = HttpUtils2.getHtmlPageLogged(s,"","");
 			
@@ -55,24 +62,28 @@ public class AuctionEventDownloader {
 	}
 	
 	
-	public String executeDownloadAuctionEventDetails(){
+	public String downloadAuctionEventDetails(){
 		
 		List<AuctionEventDTO> auctionEventList = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.LIGHT_INFO_DOWNLOADED);
 		for (AuctionEventDTO dto : auctionEventList) {
 			Document doc = HttpUtils2.getHtmlPageLogged(AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl(),"","");
 			
 			enrichAuctionEventWithDetailPage(dto, doc);
-			auctionEventDao.saveAuctionEvent(dto);
-			String auctionPageUrl = HttpUtils2.getAuctionPagelFromDetailPage("https://www.astagiudiziaria.com/inserzioni/macchinari-accessori-auto-po-1260-1264255");
-			System.out.println(auctionPageUrl);
-			System.out.println("#################");
+			String auctionPageUrl = HttpUtils2.getAuctionPagelFromDetailPage("");
+			System.out.println("detail page downloaded");
+			System.out.println("auctionPageURL: " + auctionPageUrl);
 			dto.setAuctionPageUrl(auctionPageUrl);
+			auctionEventDao.saveAuctionEvent(dto);
 //			System.out.println();
 			List<AuctionEventDTO> createAuctionEventCronology = createAuctionEventCronology(dto, doc);
 			
 			auctionEventDao.saveAuctionEvents(createAuctionEventCronology);
 //			System.out.println(dto.getAuction().getDescription()); 
 //			System.out.println(createAuctionEventCronology.size());
+			System.out.println("#################");
+			
+			System.out.println();
+
 		}
 		return "";
 	}
@@ -139,6 +150,8 @@ public class AuctionEventDownloader {
 			return;
 		}
 		
+		
+		
 		String sellEndDateString = null;
 		String courtString = null;
 		String idIVGString = null;
@@ -149,6 +162,8 @@ public class AuctionEventDownloader {
 		String categoryMacroString = null;
 		String startPriceString = null;
 		String addressString = null;
+		String proceedingString = null;
+		String lotCodeString = null;
 		
 		Elements containers = infoVendita.select("div.py-075.px-2.border-bottom.col-12");
         for (Element container : containers) {
@@ -167,8 +182,19 @@ public class AuctionEventDownloader {
                 	startPriceString = value;
                 if ("Nome".equalsIgnoreCase(label))
                 	idIVGString = value;
+                if ("Numero Procedura".equals(label))
+                	proceedingString = value;
             }
         }
+        
+        String numberP= proceedingString.split("/")[0];
+		String year= proceedingString.split("/")[1];;
+		String description= null;
+//		CERCALO PERCHE STA A DESTRA
+		ProceedingDTO proceeding = new ProceedingDTO(numberP, year, description);
+//		System.out.println(doc);
+		auctionDTO.setProceeding(proceeding);
+        
         
         containers = dettaglioLotto.select("div.py-075.px-2.border-bottom.col-12");
         for (Element container : containers) {
@@ -189,8 +215,12 @@ public class AuctionEventDownloader {
 		        	categoryC1String = value;
 		        if ("Indirizzo".equalsIgnoreCase(label))
 		        	addressString = value;
+		        if ("Codice lotto".equalsIgnoreCase(label))
+		        	lotCodeString = value;
             }
         }
+        if (lotCodeString== null)
+        	System.out.println("problema");
         if (	startPriceString!= null && !startPriceString.equals("Non presente"))  {
         	startPriceString = UsefulMethods.getCleanNumberString(startPriceString);
         	dto.setStartPrice(new Double(startPriceString));
@@ -214,6 +244,8 @@ public class AuctionEventDownloader {
 		
 		CourtEnum court = CourtEnum.findByDescription(courtString);
 		auctionDTO.setCourt(court);
+		
+		auctionDTO.setLotCode(lotCodeString);
 		
 		 //allDocuments 
         idIVGString = doc.getElementsByClass("badge").get(0).text();
@@ -322,7 +354,12 @@ public class AuctionEventDownloader {
 //		Elements teamsIds = doc.select("div.row.no-gutter.tbvoti");
 		Elements elements = doc.getElementsByClass("asta-card");
 		System.out.println(elements.size());
-		int i = 1;
+//		System.out.println(doc);
+	 //<section id="searchbar" genretitle="MOBILI" data-v-48136df8="">
+		
+		String categoryMacroString = doc.getElementById("searchbar").attr("genretitle");
+		CategoryMacroEnum categoryMacro = CategoryMacroEnum.findByDescription(categoryMacroString);
+		
 		for(Element current : elements){
 //			System.out.println(current);
 //			System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
@@ -333,13 +370,14 @@ public class AuctionEventDownloader {
 			String detailPageUrl = current.getElementsByAttribute("href").get(0).attr("href");
 			auctionEvent.setDetailPageUrl(detailPageUrl);
 			
+			auctionEvent.getAuction().setCategoryMacro(categoryMacro);
+			
 			String ivgString = current.getElementsByClass("badge").get(0).text();
 			auctionEvent.getAuction().setIdIVG(IVGEnum.findByDescription(ivgString));
 			
 			String title = current.getElementsByClass("asta-card-title").get(0).text();
 			auctionEvent.getAuction().setTitle(title);
-			
-			System.out.println(i++ + " - " + title);
+			System.out.println("card search page download " + z++ + " - " + title);
 			
 			
 			String categoryC0String = current.getElementsByClass("category-label").get(0).text();
@@ -383,11 +421,25 @@ int a = 1;
 		    Pattern pattern = Pattern.compile(regex);
 		    Matcher matcher = pattern.matcher(dateString);
 		    matcher.find();
-		    String  startDateString = matcher.group(1);
-			
-//			String startDateString = dateString.split(" ")[1];
-			Date startDate = UsefulMethods.getDate(startDateString);
-			auctionEvent.setSellStartDate(startDate);
+		    String  firstDateString = matcher.group(0);
+		    try {
+			    Date firstDate = UsefulMethods.getDate(firstDateString);
+			    if (matcher.find()) {
+			    	auctionEvent.setSellStartDate(firstDate);
+	
+			    	String  secondDateString = matcher.group(0);
+			    	Date secondDate = UsefulMethods.getDate(secondDateString);
+			    	auctionEvent.setSellEndDate(secondDate);
+			       }
+			    else {
+			    	auctionEvent.setSellEndDate(firstDate);
+			    }
+		    }
+			catch (Exception e) {
+				System.out.println(dateString);
+				Date endDate = UsefulMethods.getDate(null);
+				auctionEvent.setSellEndDate(endDate);
+			}
 			
 			String proceedingString = footerElements.get(1).text();
 			String proceedingTypeString = proceedingString.split(" Nr. ")[0];
@@ -396,9 +448,9 @@ int a = 1;
 			ProceedingDTO proceeding = new ProceedingDTO(proceedingNumberString, proceedingYearString, proceedingTypeString);
 			auctionEvent.getAuction().setProceeding(proceeding);
 			
-
 			String lotString = footerElements.get(2).text();
 			auctionEvent.getAuction().setLotCode(lotString);
+			System.out.println(lotString);
 			
 			String cityString = footerElements.get(3).text();
 			WareHouseLocationDTO warehouseLocation = new WareHouseLocationDTO();
@@ -438,7 +490,97 @@ int a = 1;
 	
 	
 	
-	
+public String downloadAuctionEventFromSearchPageWithFilter(FilterDTO filterIn){
+		
+		String url = AppConstants.ASTE_GIUDIZIARIE_MOBILE_PAGE_WITH_FILTER_URL;
+		
+//		url = "https://www.astagiudiziaria.com/ricerca/mobili?filter[genre][0]=MOBILI&"
+//				
+//				+ "filter[genre][0]=MOBILI&"
+//				+ "filter[ivg_short_name][0]=IVG Roma&"
+//				+ "filter[category][0]=AUTOVEICOLI E CICLI&"
+//				+ "filter[subcategory][0]=VEICOLI&"
+//				+ "filter[visibile_su][0]=1&filter[position]=&"
+//				+ "filter[data_vendita_search][0]=&"
+//				+ "filter[price][0]=>&filter[price][1]=1000&"
+//				+ "filter[data_vendita_search][1]=1763135199&"
+//				
+//				
+//				+ "query=lotto&"
+//				+ "page=1&rpp=20";
+//		
+		
+		
+		FilterDTO 
+		filter = new FilterDTO();
+//		filter.setCategory(CategoryMacroEnum.BENI_MOBILI.getDescription());
+//		filter.setCategoryC0(CategoryC0Enum.ARTE_OREFICERIA_OROLOGERIA_ANTIQUARIATO.getDescription());
+//		filter.setCategoryC1("VEICOLI");
+		filter.setDescription(null);
+		filter.setIvgId(IVGEnum.IVG_ROMA.getDescription());
+		filter.setSellStartDateFrom("19/01/2025");
+		filter.setSellStartDateTo("02/10/2028");
+		filter.setSellStartPriceFrom("0");
+		filter.setSellStartPriceTo("100000");
+		filter.setRpp("100");
+		
+		System.out.println();
+		
+		url = AppConstants.ASTE_GIUDIZIARIE_MOBILE_PAGE_URL;
+		
+		
+		if (filter.getCategory()!= null)
+			url+="filter[genre][0]=" + filter.getCategory() + "&";
+		if (filter.getCategoryC0()!= null)
+			url+="filter[category][0]=" + filter.getCategoryC0() + "&";
+		if (filter.getCategoryC1()!= null)
+			url+="filter[subcategory][0]=" + filter.getCategoryC1() + "&";
+		if (filter.getIvgId()!= null)
+			url+="filter[ivg_short_name][0]=" + filter.getIvgId() + "&";
+		if (filter.getDescription() != null)
+			url += "query=" + filter.getDescription() + "&";
+		
+		// DATE
+		if (filter.getSellStartDateFrom()!= null) {
+			Date date = UsefulMethods.getDate(filter.getSellStartDateFrom());
+			long time = date.getTime()/1000;
+			url+="filter[data_vendita_search][0]=" + time + "&";
+		}
+		if (filter.getSellStartDateTo()!= null) {
+			Date date = UsefulMethods.getDate(filter.getSellStartDateTo());
+			long time = date.getTime()/1000;
+			url+="filter[data_vendita_search][1]=" + time + "&";
+		}
+		
+		// PRICE
+		String from = filter.getSellStartPriceFrom();
+		String to = filter.getSellStartPriceTo(); 
+		if (from != null  && to != null)
+			url+= "filter[price][0]=" + new Double (from)+ "&filter[price][1]=" + new Double (to) + "&";
+		else if (from == null  && to != null)
+			url+= "filter[price][0]=<&filter[price][1]=" + new Double (to) + "&";
+		else if (from != null  && to == null)
+			url+= "filter[price][0]=>&filter[price][1]=" + new Double (from) + "&";
+		
+		
+		url += "filter[position]=&";
+		url += "filter[visibile_su][0]=1&";
+		url	+= "page=1&";
+		url += "rpp=" + filter.getRpp();
+		
+		//OK + "filter[price][0]=100&filter[price][1]=500000&"
+		//OK + "filter[price][0]=>&filter[price][1]=1000&"
+		
+		
+//		filter[price][0]=>&filter[price][1]=100&		maggiore di minimino	solo minimo 100
+//OK + "filter[price][0]=<&filter[price][1]=1000&"		//minore di massimo		solo massimo 50000
+//		filter[price][0]=100&filter[price][1]=500000&	compreso tra i 2		minimo e massimo 100 e 50000
+		
+		
+		System.out.println(url);
+		
+		return null;
+	}
 	
 	
 	

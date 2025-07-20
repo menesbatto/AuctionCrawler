@@ -23,10 +23,24 @@ public class FacadeController {
 		// ##########            1                ############
 		// ###################################################
 		
-		@RequestMapping(value = "/downloadAuctionEventFromSearchPage", method = RequestMethod.GET)
-		public ResponseEntity<String> downloadAuctionEventFromSearchPage() {
+		@RequestMapping(value = "/downloadAuctionEventFromSearchPageWithFilter", method = RequestMethod.GET)
+		public ResponseEntity<String> downloadAuctionEventFromSearchPageWithFilter() {
+			String d = auctionEventDownloader.downloadAuctionEventFromSearchPageWithFilter(null);
+//			User p = personDao.findById(1L);
+			String body = "Downloading with filter COMPLETED";
 			
-			String d = auctionEventDownloader.executeDownloadAuctionEventFromSearchPage();
+			ResponseEntity<String> response = new ResponseEntity<String>(d, HttpStatus.OK);
+			return response;
+		}
+			
+			// ###################################################
+			// ##########            1                ############
+			// ###################################################
+			
+			@RequestMapping(value = "/downloadAuctionEventFromSearchPage", method = RequestMethod.GET)
+			public ResponseEntity<String> downloadAuctionEventFromSearchPage() {
+			
+			String d = auctionEventDownloader.downloadAuctionEventFromSearchPage();
 //			User p = personDao.findById(1L);
 			String body = "Downloading Single Page COMPLETED";
 			
@@ -47,7 +61,7 @@ public class FacadeController {
 		@RequestMapping(value = "/downloadAuctionEventDetails", method = RequestMethod.GET)
 		public ResponseEntity<String> downloadAuctionEventDetails() {
 			
-			String d = auctionEventDownloader.executeDownloadAuctionEventDetails();
+			String d = auctionEventDownloader.downloadAuctionEventDetails();
 //					User p = personDao.findById(1L);
 			String body = "Downloading Single Page COMPLETED";
 			

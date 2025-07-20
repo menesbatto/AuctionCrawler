@@ -14,7 +14,33 @@ public class AppConstants {
 	public static String FALLCOASTE_HOME_PAGE_URL = "https://www.fallcoaste.it/ricerca.html?filter=macro%7C527%5Einput_categoria%7CBeni%20Immobili%5Eubicazione_dst%7C50%5Estato%7C1&page=1";
 //	public static String ASTE_GIUDIZIARIE_HOME_PAGE_URL = "https://www.astagiudiziaria.com/ricerca/mobili";
 //	public static String ASTE_GIUDIZIARIE_HOME_PAGE_URL = "https://www.astagiudiziaria.com/ricerca/mobili?filter%5Bgenre%5D%5B0%5D=MOBILI&filter%5Bstatus%5D%5B0%5D=In%20vendita&filter%5Bvisibile_su%5D%5B0%5D=1&filter%5Bposition%5D=&query=&page=1&rpp=100";
-	public static String ASTE_GIUDIZIARIE_HOME_PAGE_URL = "	https://www.astagiudiziaria.com/ricerca/mobili?filter%5Bgenre%5D%5B0%5D=MOBILI&filter%5Bstatus%5D%5B0%5D=In%20vendita&filter%5Bvisibile_su%5D%5B0%5D=1&filter%5Bposition%5D=&query=&page=[PAGE_NUMBER]&rpp=100";
+	public static String ASTE_GIUDIZIARIE_HOME_PAGE_URL = "https://www.astagiudiziaria.com/ricerca/mobili?filter%5Bgenre%5D%5B0%5D=MOBILI&filter%5Bstatus%5D%5B0%5D=In%20vendita&filter%5Bvisibile_su%5D%5B0%5D=1&filter%5Bposition%5D=&query=&page=[PAGE_NUMBER]&rpp=100";
+	public static String ASTE_GIUDIZIARIE_MOBILE_PAGE_URL ="https://www.astagiudiziaria.com/ricerca/mobili?";  
+	public static String ASTE_GIUDIZIARIE_MOBILE_PAGE_WITH_FILTER_URL = 
+			"https://www.astagiudiziaria.com/ricerca/mobili?"
+			+ "filter[genre][0]=&"
+			+ "filter[category][0]=&"
+			+ "filter[subcategory][0]=&" 
+			+ "filter[ivg_short_name][0]=&"
+			+ "filter[price][0]=&" 
+			+ "filter[price][1]=&"  
+			+ "filter[status][0]=&" 
+			+ "filter[data_vendita_search][0]=&"
+			+ "filter[data_vendita_search][1]=&"
+			+ "filter[latest_search][0]=&"
+			+ "filter[latest_search][1]=&"
+			
+			+ "filter[visibile_su][0]=1&"
+			+ "filter[position]=&"
+			+ "query=&"
+			+ "page=&"
+			+ "rpp=";
+	
+	
+				
+					
+											
+	
 	//	URL
 	public static String ASTE_GIUDIZIARIE_ESEMPIO =  "https://www.astagiudiziaria.com/inserzioni/rif-8-anello-oro-bianco-750-con-quarzo-rosa-e-diamanti-ct-080-peso-totale-gr-527-1272381";
 	public static String LAST_SEASON_DAY_URL = "http://www.fantagazzetta.com/voti-fantacalcio-serie-a";
