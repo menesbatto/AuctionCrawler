@@ -1,5 +1,7 @@
 package app.logic._0_votesDownloader;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +42,18 @@ public class AuctionEventDownloader {
 	
 	private int z = 1;
 	
-
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+	 
+	public String openAllSeemedGoodDeals(){
+//		List<AuctionEventDTO> auctionEvents = auctionEventDao.retrieveGoodAuctionEvents();
+		List<AuctionEventDTO> auctionEvents = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.DETAIL_INFO_DOWNLOADED);
+		for (AuctionEventDTO dto: auctionEvents){
+			String detailPageUrl = AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl();
+			HttpUtils2.openNewTab(detailPageUrl);
+			System.out.println("pagina aperta: " + detailPageUrl);
+		}
+		return "";
+	}
 	
 	
 	
@@ -48,7 +61,7 @@ public class AuctionEventDownloader {
 		String s;
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
 		Document doc= null;
-		for (int i = 1; i<=1 ; i++) {
+		for (int i = 1; i<=20 ; i++) {
 			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
 			doc = HttpUtils2.getHtmlPageLogged(s,"","");
 			
@@ -67,7 +80,7 @@ public class AuctionEventDownloader {
 		List<AuctionEventDTO> auctionEventList = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.LIGHT_INFO_DOWNLOADED);
 		for (AuctionEventDTO dto : auctionEventList) {
 			Document doc = HttpUtils2.getHtmlPageLogged(AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl(),"","");
-			
+			System.out.println();
 			enrichAuctionEventWithDetailPage(dto, doc);
 			String auctionPageUrl = HttpUtils2.getAuctionPagelFromDetailPage("");
 			System.out.println("detail page downloaded");
@@ -80,7 +93,10 @@ public class AuctionEventDownloader {
 			auctionEventDao.saveAuctionEvents(createAuctionEventCronology);
 //			System.out.println(dto.getAuction().getDescription()); 
 //			System.out.println(createAuctionEventCronology.size());
-			System.out.println("#################");
+			LocalTime oraCorrente = LocalTime.now();
+		     
+			
+			System.out.println("######### " + oraCorrente.format(formatter) + " ########");
 			
 			System.out.println();
 
@@ -219,8 +235,10 @@ public class AuctionEventDownloader {
 		        	lotCodeString = value;
             }
         }
+        System.out.println();
         if (lotCodeString== null)
-        	System.out.println("problema");
+        	lotCodeString = "0";
+//        	System.out.println("problema");
         if (	startPriceString!= null && !startPriceString.equals("Non presente"))  {
         	startPriceString = UsefulMethods.getCleanNumberString(startPriceString);
         	dto.setStartPrice(new Double(startPriceString));

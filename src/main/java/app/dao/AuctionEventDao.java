@@ -15,6 +15,9 @@ import app.logic._0_votesDownloader.model.AuctionDTO;
 import app.logic._0_votesDownloader.model.AuctionEventDTO;
 import app.logic._0_votesDownloader.model.ProcessStatusEnum;
 import app.logic._0_votesDownloader.model.WareHouseLocationDTO;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 @Service
 @EnableCaching
@@ -129,8 +132,13 @@ public class AuctionEventDao {
 				
 				String title = auctionDTO.getTitle();
 //				auction = auctionRepo.findByTitle(auctionDTO.getTitle());
-				
+				System.out.println();
 				auction = auctionRepo.findByProceedingAndLotCodeAndTitle(proceeding, lotCode, title);
+				if (auction == null && "-".equals(lotCode)){
+					lotCode= "0";
+					auction = auctionRepo.findByProceedingAndLotCodeAndTitle(proceeding, lotCode, title);
+					System.out.println("auction trovate per modifica lot code da - a 0 ");
+				}
 //				CONTROLLA DA QUA
 //				auction = auctionRepo.findByTitle(auctionDTO.getTitle());
 				if (auction!= null) {
@@ -142,8 +150,9 @@ public class AuctionEventDao {
 			}
 			if (auction == null )	{					// Se è il primo AuctionEvent che metto dalla home e quindi ancora non c'è l'auction
 				if (ent.getDetailPageUrl() != null){	// Se a DB l'autctionEvent è presente. A DB è sempre presente
-					System.out.println("Errore la pagina del dettaglio non funziona piu'");
+					System.out.println("Errore la pagina del dettaglio non funziona piu': " + ent.getDetailPageUrl());
 					ent.setProcessState(ProcessStatusEnum.BLOCKED_NO_DETAIL_PAGE.getCode());
+					
 					return ent;
 				}
 			}
@@ -247,6 +256,29 @@ public class AuctionEventDao {
 		}
 		
 		return dtoList;
+	}
+
+	public List<AuctionEventDTO> retrieveGoodAuctionEvents() {
+//		  String sql = "SELECT ae.* " +
+//                  "FROM auctionEvent ae " +
+//                  "JOIN auction a ON ae.auction_id = a.id " +
+//                  "JOIN ( " +
+//                  "    SELECT ae_inner.auction_id, MIN(ae_inner.startPrice) AS min_prezzo, MAX(ae_inner.startPrice) AS max_prezzo " +
+//                  "    FROM auctionEvent ae_inner " +
+//                  "    JOIN auction a_inner ON ae_inner.auction_id = a_inner.id " +
+//                  "    WHERE a_inner.idIVG = :idIvg " +
+//                  "    GROUP BY ae_inner.auction_id " +
+//                  "    HAVING COUNT(*) >= 2 " +
+//                  "       AND MAX(ae_inner.startPrice) >= MIN(ae_inner.startPrice) * 3 " +
+//                  ") agg ON ae.auction_id = agg.auction_id " +
+//                  "     AND (ae.startPrice = agg.min_prezzo OR ae.startPrice = agg.max_prezzo) " +
+//                  "WHERE a.idIVG = :idIvg";
+//
+//     Query query = entityManager.createNativeQuery(sql, AuctionEvent.class);
+//     query.setParameter("idIvg", "IVG Roma");
+//
+//     return query.getResultList();
+     return null;
 	}
 
 

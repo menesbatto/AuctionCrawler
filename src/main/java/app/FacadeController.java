@@ -19,6 +19,19 @@ public class FacadeController {
 
 	
 		
+	// ###################################################
+	// ##########            0	              ############
+	// ###################################################
+	
+	@RequestMapping(value = "/openAllSeemedGoodDeals", method = RequestMethod.GET)
+	public ResponseEntity<String> openAllSeemedGoodDeals() {
+		String d = auctionEventDownloader.openAllSeemedGoodDeals();
+//			User p = personDao.findById(1L);
+		String body = "openAllSeemedGoodDeals with filter COMPLETED";
+		
+		ResponseEntity<String> response = new ResponseEntity<String>(d, HttpStatus.OK);
+		return response;
+	}
 		// ###################################################
 		// ##########            1                ############
 		// ###################################################

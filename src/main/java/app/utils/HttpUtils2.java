@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.Connection;
@@ -29,6 +30,23 @@ public class HttpUtils2 {
 
 	private static WebDriver loggedWebDriver;
 	
+	
+	
+
+
+	public static void openNewTab(String detailPageUrl) {
+		if (getLoggedWebDriver() == null)
+			initLoggedWebDriver("", "");
+		
+		((JavascriptExecutor) getLoggedWebDriver()).executeScript("window.open('about:blank','_blank');");
+		 ArrayList<String> tabs = new ArrayList<>(getLoggedWebDriver().getWindowHandles());
+		getLoggedWebDriver().switchTo().window(tabs.get(tabs.size()-1));
+		getLoggedWebDriver().get(detailPageUrl);
+	}
+
+	public static void openHtmlPageLogged(String detailPageUrl) {
+		openPage(detailPageUrl);
+	}
 	
 	public static Document getHtmlPageLogged(String url, String username, String password){
 //		WebElement loginBtnPage = getLoggedWebDriver().findElement(By.xpath("//button[@type='button' and normalize-space(text())='Vai alla gara online']"));
@@ -82,7 +100,7 @@ public class HttpUtils2 {
 //		getLoggedWebDriver().get(url);
 		
 		// CHIUDO SOLO LA PRIMA VOLTA I COOKIE
-		WebDriverWait wait;
+//		WebDriverWait wait;
 
 		// CLICCO SUL BUTTON PER AVERE IL BUTTON COL LINK AL SITO DELL'ASTA
 		List<WebElement> showLinkButtons = getLoggedWebDriver().findElements(By.xpath("//button[contains(text(), 'alla gara online')]"));
@@ -108,7 +126,7 @@ public class HttpUtils2 {
 			System.out.println("");
 		}
 		// RECUPERO IL LINK AL BUTTON
-		 wait = new WebDriverWait(getLoggedWebDriver(),5);
+//		 wait = new WebDriverWait(getLoggedWebDriver(),5);
 		 
 		 List<WebElement> links = getLoggedWebDriver().findElements(By.tagName("a"));
 		 String auctionSiteUrl = null;
@@ -146,7 +164,26 @@ public class HttpUtils2 {
 		
 	}
 
-
+	private static void closePopupCookieWithDriver(WebDriver driver) {
+		List<WebElement> closeCookieButtons = driver.findElements((By.className("iubenda-cs-accept-btn")));
+		WebDriverWait wait;
+		WebElement closeButton;
+		if (closeCookieButtons.size()==1) {
+			closeButton = closeCookieButtons.get(0);
+			wait = new WebDriverWait(driver,5);
+//	    	wait.until(ExpectedConditions.presenceOfElementLocated(By.className("qc-cmp-button")));
+			try {
+				closeButton.click();
+			}
+			catch(org.openqa.selenium.StaleElementReferenceException ex)
+		    {
+				System.out.println("Errore");
+//		    	loginBtnPage = getLoggedWebDriver().findElement(By.className("hidden-logged")); 
+//		    	loginBtnPage.click();
+		    }
+		}
+	}
+	
 	private static void closePopupCookie() {
 		List<WebElement> closeCookieButtons = getLoggedWebDriver().findElements((By.className("iubenda-cs-accept-btn")));
 		WebDriverWait wait;
@@ -177,7 +214,33 @@ public class HttpUtils2 {
 //		return doc;
 //	}
 	
-	
+	private static WebDriver openPage(String url) {
+		WebDriver driver = null;
+		int i = 1;
+
+		while (i <= 3){
+			try {
+				// 1 - Crea driver pronto per navigare
+				driver = initDriver();
+				System.out.println();
+				// 2 - Esegui login su fantagazzetta
+				
+				driver.get(url);
+				
+//			    // 3 - Setta il Web Driver nel field della classe
+			    closePopupCookieWithDriver(driver);
+			    break;
+			}
+			catch (Exception e) {
+				System.out.println("Errore durante la creazione del Driver loggato. Tentativo: " + i);
+				setLoggedWebDriver(null);
+				driver.close();
+			}
+			i++;
+		}
+	    
+	    return driver;
+	}
 
 	private static WebDriver initLoggedWebDriver(String username, String password) {
 		WebDriver driver = null;
@@ -387,6 +450,8 @@ public class HttpUtils2 {
 	public static void setLoggedWebDriver(WebDriver loggedWebDriver) {
 		HttpUtils2.loggedWebDriver = loggedWebDriver;
 	}
+
+
 
 
 	
