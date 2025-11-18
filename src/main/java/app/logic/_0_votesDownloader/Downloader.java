@@ -34,7 +34,7 @@ import app.utils.HttpUtils2;
 import app.utils.UsefulMethods;
 
 @Service
-public class AuctionEventDownloader {
+public class Downloader {
 	
 	
 	@Autowired
@@ -45,8 +45,8 @@ public class AuctionEventDownloader {
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 	 
 	public String openAllSeemedGoodDeals(){
-//		List<AuctionEventDTO> auctionEvents = auctionEventDao.retrieveGoodAuctionEvents();
-		List<AuctionEventDTO> auctionEvents = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.DETAIL_INFO_DOWNLOADED);
+		List<AuctionEventDTO> auctionEvents = auctionEventDao.retrieveGoodAuctionEvents();
+//		List<AuctionEventDTO> auctionEvents = auctionEventDao.retrieveAuctionEvents(ProcessStatusEnum.DETAIL_INFO_DOWNLOADED);
 		for (AuctionEventDTO dto: auctionEvents){
 			String detailPageUrl = AppConstants.ASTE_GIUDIZIARIE_BASE_URL + dto.getDetailPageUrl();
 			HttpUtils2.openNewTab(detailPageUrl);
@@ -61,8 +61,8 @@ public class AuctionEventDownloader {
 		String s;
 		List<AuctionEventDTO> auctionEventList = new ArrayList<>();
 		Document doc= null;
-		for (int i = 1; i<=20 ; i++) {
-			s = AppConstants.ASTE_GIUDIZIARIE_HOME_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
+		for (int i = 1; i<=60 ; i++) {
+			s = AppConstants.ASTE_GIUDIZIARIE_MOBILE_FILTER_PAGE_URL.replace("[PAGE_NUMBER]" , i+"");
 			doc = HttpUtils2.getHtmlPageLogged(s,"","");
 			
  			List<AuctionEventDTO> extractedAuctionEvents = extractAuctionEvents(doc);
@@ -461,11 +461,26 @@ int a = 1;
 			
 			String proceedingString = footerElements.get(1).text();
 			String proceedingTypeString = proceedingString.split(" Nr. ")[0];
-			String proceedingNumberString = proceedingString.split(" Nr. ")[1].split("/")[0];
-			String proceedingYearString = proceedingString.split(" Nr. ")[1].split("/")[1];
-			ProceedingDTO proceeding = new ProceedingDTO(proceedingNumberString, proceedingYearString, proceedingTypeString);
+			String proceedingNumberString;
+			String proceedingYearString;
+			ProceedingDTO proceeding;
+			try {
+				System.out.println();
+			if (proceedingString.split(" Nr. ")[0].contains("Nr. ")) {
+				proceedingNumberString = proceedingString.split(" Nr. ")[0].split("/")[0];
+				proceedingYearString = proceedingString.split(" Nr. ")[0].split("/")[1];
+			}
+			else {
+				proceedingNumberString = proceedingString.split(" Nr. ")[1].split("/")[0];
+				proceedingYearString = proceedingString.split(" Nr. ")[1].split("/")[1];
+				
+			}
+			proceeding = new ProceedingDTO(proceedingNumberString, proceedingYearString, proceedingTypeString);
 			auctionEvent.getAuction().setProceeding(proceeding);
-			
+			}
+			catch(Exception e) {
+				System.out.println(e);
+			}
 			String lotString = footerElements.get(2).text();
 			auctionEvent.getAuction().setLotCode(lotString);
 			System.out.println(lotString);

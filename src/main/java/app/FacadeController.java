@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import app.logic._0_votesDownloader.AuctionEventDownloader;
+import app.logic._0_votesDownloader.Downloader;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path = "/api") // This means URL's start with /demo (after Application path)
@@ -15,7 +15,7 @@ public class FacadeController {
 
 
 	@Autowired
-	private AuctionEventDownloader auctionEventDownloader;
+	private Downloader auctionEventDownloader;
 
 	
 		

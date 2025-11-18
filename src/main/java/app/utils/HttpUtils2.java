@@ -60,10 +60,10 @@ public class HttpUtils2 {
 				initLoggedWebDriver(username, password);
 			
 			
-			Thread.sleep(1000);
+			Thread.sleep(300);
 			
 			getLoggedWebDriver().get(url);
-			Thread.sleep(1000);
+			Thread.sleep(300);
 		    String pageSource = getLoggedWebDriver().getPageSource();
 			doc = Jsoup.parse(pageSource);
 			

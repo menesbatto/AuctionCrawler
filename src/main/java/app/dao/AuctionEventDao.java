@@ -259,6 +259,16 @@ public class AuctionEventDao {
 	}
 
 	public List<AuctionEventDTO> retrieveGoodAuctionEvents() {
+//		List<AuctionEvent> ents = auctionEventRepo.findExtremeAuctionEvents("IVG Roma");
+		List<AuctionEvent> ents = auctionEventRepo.findExtremeAuctionEventsWithRange(10000,15000);
+		List<AuctionEventDTO> dtoList = new ArrayList<>();
+		for (AuctionEvent ent : ents) {
+			AuctionEventDTO dto = new AuctionEventDTO();
+			// CREA DTO DA ENTITY
+			dto.setDetailPageUrl(ent.getDetailPageUrl());
+			dtoList.add(dto);
+		}
+		return dtoList;
 //		  String sql = "SELECT ae.* " +
 //                  "FROM auctionEvent ae " +
 //                  "JOIN auction a ON ae.auction_id = a.id " +
@@ -278,7 +288,6 @@ public class AuctionEventDao {
 //     query.setParameter("idIvg", "IVG Roma");
 //
 //     return query.getResultList();
-     return null;
 	}
 
 
